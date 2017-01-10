@@ -30,7 +30,8 @@ public class BaseBot {
 
     public static BulletInfo[] bulletsInSenseRadius = null;
 
-    public static void init(RobotController myRC){
+    public static void init(RobotController myRC)
+    {
         rc = myRC;
         us = rc.getTeam();
         them = us.opponent();
@@ -42,10 +43,12 @@ public class BaseBot {
         centerOfOurInitialArchons = new MapLocation(0,0);
         centerOfTheirInitialArchons = new MapLocation(0,0);
         centerOfAllInitialArchons = new MapLocation(0,0);
-        for (MapLocation a : ourInitialArchonLocations) {
+        for (MapLocation a : ourInitialArchonLocations)
+        {
             centerOfOurInitialArchons = FastMath.addVec(centerOfOurInitialArchons, a);
         }
-        for (MapLocation a : theirInitialArchonLocations) {
+        for (MapLocation a : theirInitialArchonLocations)
+        {
             centerOfTheirInitialArchons = FastMath.addVec(centerOfTheirInitialArchons, a);
         }
         centerOfAllInitialArchons = FastMath.addVec(centerOfOurInitialArchons, centerOfTheirInitialArchons);
@@ -55,7 +58,8 @@ public class BaseBot {
         here = rc.getLocation();
     }
 
-    public static MapLocation closetInitalEnemyArchonLocation() {
+    public static MapLocation closetInitalEnemyArchonLocation()
+    {
         MapLocation ret = null;
         float minDistSq = Float.MAX_VALUE;
         for (int i = theirInitialArchonLocations.length; i --> 0; ) {
@@ -68,12 +72,14 @@ public class BaseBot {
         return ret;
     }
 
-    public static void update() {
+    public static void update()
+    {
         here = rc.getLocation();
         roundNum = rc.getRoundNum();
     }
 
-    public static void updateRobotInfos() {
+    public static void updateRobotInfos()
+    {
         visibleAllies = rc.senseNearbyRobots(-1, us);
         visibleEnemies =  rc.senseNearbyRobots(-1, them);
         visibleAlliedTrees = rc.senseNearbyTrees(-1,us);

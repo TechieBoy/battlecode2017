@@ -1,12 +1,15 @@
 package framework_bot;
 import battlecode.common.*;
 
-public strictfp class RobotPlayer extends BaseBot{
+public strictfp class RobotPlayer extends BaseBot
+{
 
     @SuppressWarnings("unused")
-    public static void run(RobotController myRc) throws Exception {
+    public static void run(RobotController myRc) throws Exception
+    {
         BaseBot.init(myRc);
-        switch (rc.getType()) {
+        switch (rc.getType())
+        {
             case ARCHON:
                 ArchonBot.runArchon();
                 break;
