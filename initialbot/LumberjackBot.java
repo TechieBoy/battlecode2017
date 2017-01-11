@@ -14,23 +14,30 @@ public class LumberjackBot extends BaseBot
             try
             {
                 updateRobotInfos();
-                if(visibleEnemies.length>0)
+                here = rc.getLocation();
+                checkIfAtWar();
+
+                if(!atWar)
                 {
-                    rc.strike();
-                }
-                else if (visibleNeutralTrees.length > 0)
-                {
-                    if (rc.canMove(here.directionTo(visibleNeutralTrees[0].location)))
+                    if (visibleEnemies.length > 0)
                     {
-                        rc.move(here.directionTo(visibleNeutralTrees[0].location));
-                    }
-                    else
+                        rc.strike();
+                    } else if (visibleNeutralTrees.length > 0)
                     {
-                        if (rc.canChop(visibleNeutralTrees[0].getID()))
+                        if (rc.canMove(visibleNeutralTrees[0].location))
                         {
-                            System.out.println("Trying to chop at " + here.distanceTo(visibleNeutralTrees[0].location));
-                            rc.chop(visibleNeutralTrees[0].getID());
+                            rc.move(here.directionTo(visibleNeutralTrees[0].location));
+                        } else
+                        {
+                            if (rc.canChop(visibleNeutralTrees[0].getID()))
+                            {
+                                System.out.println("Trying to chop at " + here.distanceTo(visibleNeutralTrees[0].location));
+                                rc.chop(visibleNeutralTrees[0].getID());
+                            }
                         }
+                    } else
+                    {
+                        tryMove(here.directionTo(centerOfAllInitialArchons));
                     }
                 }
                 Clock.yield();
