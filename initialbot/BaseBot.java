@@ -11,9 +11,6 @@ public class BaseBot {
     public static int myID;
     public static RobotType myType;
     public static int roundNum;
-    public static boolean atWar;
-
-    public static int warFrequency = GameConstants.BROADCAST_MAX_CHANNELS/2;
 
     enum motionType
     {
@@ -102,7 +99,7 @@ public class BaseBot {
     }
 
     public static boolean tryMove(Direction dir) throws GameActionException {
-        return tryMove(dir,30,5);
+        return tryMove(dir,25,3);
     }
 
     public static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
@@ -137,13 +134,5 @@ public class BaseBot {
     static Direction randomDirection()
     {
         return new Direction((float)Math.random() * 2 * (float)Math.PI);
-    }
-
-    static void checkIfAtWar() throws GameActionException
-    {
-        if(rc.readBroadcast(warFrequency)>0)
-        {
-            atWar = true;
-        }
     }
 }

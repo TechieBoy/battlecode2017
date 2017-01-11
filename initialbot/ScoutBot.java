@@ -12,7 +12,6 @@ public class ScoutBot extends BaseBot
         while (true)
         {
             updateRobotInfos();
-
             Clock.yield();
         }
     }
