@@ -73,9 +73,9 @@ public class GardenerBot extends BaseBot
                 else
                 {
                     dir = randomDirection();
-                    if (rc.canBuildRobot(RobotType.LUMBERJACK, dir))
+                    if (rc.canBuildRobot(RobotType.SCOUT, dir))
                     {
-                        rc.buildRobot(RobotType.LUMBERJACK, dir);
+                        rc.buildRobot(RobotType.SCOUT, dir);
                     }
                 }
                 visibleAlliedTrees = rc.senseNearbyTrees(1.5f,us);

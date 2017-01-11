@@ -12,12 +12,6 @@ public class BaseBot {
     public static RobotType myType;
     public static int roundNum;
 
-    enum motionType
-    {
-        direct,bug
-    }
-    public static Direction prevDirection;
-    public static motionType currentMotionType;
 
     public static int numberOfInitialArchon;
 
@@ -105,7 +99,7 @@ public class BaseBot {
     public static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
         // First, try intended direction
-        if (rc.canMove(dir)) {
+        if (rc.canMove(dir) && !rc.hasMoved()) {
             rc.move(dir);
             return true;
         }
