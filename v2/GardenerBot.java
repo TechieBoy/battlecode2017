@@ -4,32 +4,42 @@ import battlecode.common.*;
 
 public class GardenerBot extends BaseBot
 {
-    private static Direction prevDirection = here.directionTo(closetInitalEnemyArchonLocation());
+    private static final Direction holeTowardsEnemy= here.directionTo(closetInitalEnemyArchonLocation());
+    private static final int roundSpawned = rc.getRoundNum();
+    private static Direction prevDirection = holeTowardsEnemy;
+    private static Direction bounce = Direction.getWest();
 
-    private static Direction getNextDirection(Direction prevDirection){
+    private static Direction getNextDirection(Direction prevDirection)
+    {
         return prevDirection.rotateLeftDegrees(60);
     }
 
-    private static int howManyTreesCanBePlanted(MapLocation location){
+    private static int howManyTreesCanBePlanted(MapLocation location)
+    {
         int howMany = 0;
         Direction dir = location.directionTo(closetInitalEnemyArchonLocation());
-        for(int i=0;i<=360;i+= 60){
-            if(rc.canPlantTree(dir.rotateLeftDegrees(i))){
+        for (int i = 0; i <= 360; i += 60)
+        {
+
+            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(2.2f).length == 0 &&
+                    rc.senseNearbyTrees(2.2f).length == 0)
+            {
                 howMany++;
             }
         }
         return howMany;
     }
 
-    private static void wander(int i) throws GameActionException{
-        if(i<10)
-            tryMove(Direction.getNorth());
-        if(i>=10 && i< 20)
-            tryMove(Direction.getWest());
-        if(i>=20 && i< 40)
-            tryMove(Direction.getSouth());
-        if(i>=40 && i<= 50)
-            tryMove(Direction.getEast());
+    private static void wander() throws GameActionException
+    {
+        if (!rc.hasMoved())
+        {
+            if (!rc.canMove(bounce))
+            {
+                bounce = randomDirection();
+            } else
+                tryMove(bounce);
+        }
 
     }
 
@@ -37,17 +47,17 @@ public class GardenerBot extends BaseBot
     {
         try
         {
-            for (int i = 50; i-- > 0; )
+            while (rc.getRoundNum() - roundSpawned < 20 )
             {
-                if(!rc.hasMoved())
-                    wander(i);
                 here = rc.getLocation();
-                if (howManyTreesCanBePlanted(here) >= 5)
+                if (howManyTreesCanBePlanted(here) >= 4)
                 {
-                    break ;
-                }
+                    break;
+                } else if (!rc.hasMoved())
+                    wander();
             }
-        }catch (GameActionException e){
+        } catch (GameActionException e)
+        {
             e.printStackTrace();
         }
 
@@ -73,24 +83,22 @@ public class GardenerBot extends BaseBot
                         // If theta > 90 degrees, then the bullet is traveling away from us and we can break early
                         if (Math.abs(theta) < Math.PI / 2 && perpendicularDist <= rc.getType().bodyRadius)
                         {
-                            if(rc.canBuildRobot(RobotType.SOLDIER,directionToRobot))
+                            if (rc.canBuildRobot(RobotType.SOLDIER, directionToRobot))
                             {
-                                rc.buildRobot(RobotType.SOLDIER,directionToRobot);
+                                rc.buildRobot(RobotType.SOLDIER, directionToRobot);
                             }
 
                             if (rc.canMove(directionToRobot.getWest()))
                             {
                                 tryMove(directionToRobot.getWest());
-                            }
-                            else if (rc.canMove(directionToRobot.getEast()))
+                            } else if (rc.canMove(directionToRobot.getEast()))
                             {
                                 tryMove(directionToRobot.getEast());
                             }
                             break;
                         }
                     }
-                }
-                else if (!rc.hasMoved() && visibleEnemies.length > 0)
+                } else if (!rc.hasMoved() && visibleEnemies.length > 0)
                 {
                     for (int i = visibleEnemies.length; i-- > 0; )
                     {
@@ -105,36 +113,27 @@ public class GardenerBot extends BaseBot
                 }
 
                 Direction dir = getNextDirection(prevDirection);
-                if (rc.hasTreeBuildRequirements() && rc.canPlantTree(dir))
+                if (rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && dir != holeTowardsEnemy)
                 {
                     rc.plantTree(dir);
                     prevDirection = dir;
                 }
-//                else
-//                {
-//                    if(!rc.hasMoved())
-//                        wander((int)(Math.random()*60));
-////                    dir = randomDirection();
-////                    if (rc.canBuildRobot(RobotType.LUMBERJACK, dir))
-////                    {
-////                        rc.buildRobot(RobotType.LUMBERJACK, dir);
-////                    }
-//                }
-                visibleAlliedTrees = rc.senseNearbyTrees(1.5f,us);
-                if(visibleAlliedTrees.length>0)
+                else if(rc.hasRobotBuildRequirements(RobotType.LUMBERJACK) && rc.canBuildRobot(RobotType.LUMBERJACK,dir) && dir==holeTowardsEnemy && rc.getRoundNum()>500)
                 {
-                    for(int i=visibleAlliedTrees.length; i-->0;)
+                    rc.buildRobot(RobotType.LUMBERJACK,dir);
+                    prevDirection = dir;
+                }
+                visibleAlliedTrees = rc.senseNearbyTrees(1.5f, us);
+                if (visibleAlliedTrees.length > 0)
+                {
+                    for (int i = visibleAlliedTrees.length; i-- > 0; )
                     {
-                        //if(visibleAlliedTrees[i].getHealth() < 30)
-                        //{
-                            rc.water(visibleAlliedTrees[i].getID());
-                        //}
+                        rc.water(visibleAlliedTrees[i].getID());
                         Clock.yield();
                     }
                 }
                 Clock.yield();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 e.printStackTrace();
             }

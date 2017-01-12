@@ -1,37 +1,51 @@
 package v2;
 
-import battlecode.common.Clock;
-import battlecode.common.GameActionException;
+import battlecode.common.*;
 
 public class LumberjackBot extends BaseBot
 {
+    private static Direction bounce = Direction.getNorth();
 
+    private static void wander() throws GameActionException
+    {
+        if (!rc.hasMoved())
+        {
+            if (!rc.canMove(bounce))
+            {
+                bounce = randomDirection();
+            } else
+                tryMove(bounce);
+        }
+
+    }
     public static void runLumberjack() throws GameActionException
     {
-        System.out.println("I'm a LumberJack!");
+
         while(true)
         {
             try
             {
-                updateRobotInfos();
-                if(visibleEnemies.length>0)
+                if(rc.senseNearbyRobots(1,them).length>0)
                 {
                     rc.strike();
                 }
-                else if (visibleNeutralTrees.length > 0)
+                else if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0)
                 {
-                    if (rc.canMove(here.directionTo(visibleNeutralTrees[0].location)))
+                    TreeInfo[] info = rc.senseNearbyTrees(-1,Team.NEUTRAL);
+                    if (rc.canMove(here.directionTo(info[0].location)))
                     {
-                        rc.move(here.directionTo(visibleNeutralTrees[0].location));
+                        rc.move(here.directionTo(info[0].location));
                     }
                     else
                     {
-                        if (rc.canChop(visibleNeutralTrees[0].getID()))
+                        if (rc.canChop(info[0].getID()))
                         {
-                            System.out.println("Trying to chop at " + here.distanceTo(visibleNeutralTrees[0].location));
-                            rc.chop(visibleNeutralTrees[0].getID());
+                            rc.chop(info[0].getID());
                         }
                     }
+                }
+                else{
+                    wander();
                 }
                 Clock.yield();
             }

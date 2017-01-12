@@ -1,15 +1,13 @@
 package v2;
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
+import battlecode.common.*;
 
 public class ArchonBot extends BaseBot
 {
+    private static int NUM_GARDENERS_CHANNEL = GameConstants.BROADCAST_MAX_CHANNELS - 4;
+
     public static void runArchon() throws GameActionException
     {
-        System.out.println("I'm an archon!");
         while (true)
         {
             try
@@ -55,23 +53,18 @@ public class ArchonBot extends BaseBot
                         }
                     }
                 }
-                else
-                {
-                    if (!rc.hasMoved() && rc.canMove(here.directionTo(centerOfOurInitialArchons)))
-                        tryMove(here.directionTo(centerOfOurInitialArchons));
-                }
                 Direction dir = new Direction((float) Math.random() * 2 * (float) Math.PI);
-                if (rc.canHireGardener(dir) && Math.random() * rc.getRoundNum() < rc.getRoundLimit() * 0.1)
+                if (rc.canHireGardener(dir) && rc.readBroadcast(NUM_GARDENERS_CHANNEL) < 10)
                 {
                     rc.hireGardener(dir);
+                    rc.broadcast(NUM_GARDENERS_CHANNEL, (rc.readBroadcast(NUM_GARDENERS_CHANNEL) + 1));
                 }
-                if(rc.getTeamBullets()>310)
+                if (rc.getTeamBullets() > 310)
                 {
-                    rc.donate(10.0f);
+                    rc.donate(rc.getTeamBullets() - 310);
                 }
                 Clock.yield();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 e.printStackTrace();
             }
