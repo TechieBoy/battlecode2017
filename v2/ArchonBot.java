@@ -54,7 +54,7 @@ public class ArchonBot extends BaseBot
                     }
                 }
                 Direction dir = new Direction((float) Math.random() * 2 * (float) Math.PI);
-                if (rc.canHireGardener(dir) && rc.readBroadcast(NUM_GARDENERS_CHANNEL) < 20)
+                if (rc.canHireGardener(dir) && rc.readBroadcast(NUM_GARDENERS_CHANNEL) < 14)
                 {
                     rc.hireGardener(dir);
                     rc.broadcast(NUM_GARDENERS_CHANNEL, (rc.readBroadcast(NUM_GARDENERS_CHANNEL) + 1));

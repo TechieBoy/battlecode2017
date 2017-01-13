@@ -7,7 +7,7 @@ public class GardenerBot extends BaseBot
     private static final Direction HOLE_TOWARDS_ENEMY = here.directionTo(closetInitalEnemyArchonLocation());
     private static final int ROUND_SPAWNED = rc.getRoundNum();
     private static Direction prevDirection = HOLE_TOWARDS_ENEMY;
-    private static Direction bounce = Direction.getWest();
+    private static Direction bounce = Direction.getSouth();
     private static final int NUMBER_OF_GARDENERS_CHANNEL = 0;
     private static final int NUMBER_OF_TREES_CHANNEL = 1;
     private static int treesBuiltByMe = 0;
@@ -20,9 +20,8 @@ public class GardenerBot extends BaseBot
         {
             int numGardenersAlreadyOnMap = rc.readBroadcast(NUMBER_OF_GARDENERS_CHANNEL);
             rc.broadcast(NUMBER_OF_GARDENERS_CHANNEL,numGardenersAlreadyOnMap+1);
-            System.out.println("Spawned at " + ROUND_SPAWNED);
             wander();
-            while (rc.getRoundNum() - ROUND_SPAWNED < 20 )
+            while (true)
             {
                 here = rc.getLocation();
                 if (howManyTreesCanBePlanted(here) >= 4)
@@ -39,6 +38,7 @@ public class GardenerBot extends BaseBot
 
         while (true)
         {
+            rc.setIndicatorDot(here.add(7f),255,0,0);
             try
             {
                 int numTreesAlreadyOnMap = rc.readBroadcast(NUMBER_OF_TREES_CHANNEL);
@@ -147,7 +147,7 @@ public class GardenerBot extends BaseBot
         for (int i = 0; i <= 360; i += 60)
         {
 
-            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(2.2f).length == 0 &&
+            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(-1,us).length == 0 &&
                     rc.senseNearbyTrees(2.2f).length == 0)
             {
                 howMany++;

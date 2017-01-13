@@ -76,6 +76,20 @@ public class BaseBot {
         return ret;
     }
 
+    public static MapLocation closetInitalAlliedArchonLocation()
+    {
+        MapLocation ret = null;
+        float minDistSq = Float.MAX_VALUE;
+        for (int i = ourInitialArchonLocations.length; i --> 0; ) {
+            float distSq = here.distanceSquaredTo(ourInitialArchonLocations[i]);
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                ret = ourInitialArchonLocations[i];
+            }
+        }
+        return ret;
+    }
+
     public static void update()
     {
         here = rc.getLocation();

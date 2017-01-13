@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class LumberjackBot extends BaseBot
 {
-    private static Direction bounce = randomDirection();
+    private static Direction bounce = Direction.getEast();
 
     private static void wander() throws GameActionException
     {
@@ -25,7 +25,7 @@ public class LumberjackBot extends BaseBot
         {
             try
             {
-                while(rc.senseNearbyRobots(1,them).length>0)
+                if(rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS,them).length>0)
                 {
                     if(rc.canStrike())
                         rc.strike();
