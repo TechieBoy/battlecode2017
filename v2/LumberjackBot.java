@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class LumberjackBot extends BaseBot
 {
-    private static Direction bounce = Direction.getNorth();
+    private static Direction bounce = randomDirection();
 
     private static void wander() throws GameActionException
     {
@@ -25,22 +25,25 @@ public class LumberjackBot extends BaseBot
         {
             try
             {
-                if(rc.senseNearbyRobots(1,them).length>0)
+                while(rc.senseNearbyRobots(1,them).length>0)
                 {
-                    rc.strike();
+                    if(rc.canStrike())
+                        rc.strike();
+                    else
+                        break;
                 }
-                else if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0)
+                TreeInfo[] info = rc.senseNearbyTrees(-1,Team.NEUTRAL);
+                if (info.length > 0)
                 {
-                    TreeInfo[] info = rc.senseNearbyTrees(-1,Team.NEUTRAL);
-                    if (rc.canMove(here.directionTo(info[0].location)))
+                    if (rc.canChop(info[0].ID))
                     {
-                        rc.move(here.directionTo(info[0].location));
+                        rc.chop(info[0].ID);
                     }
                     else
                     {
-                        if (rc.canChop(info[0].getID()))
+                        if (rc.canMove(here.directionTo(info[0].location)))
                         {
-                            rc.chop(info[0].getID());
+                            rc.move(here.directionTo(info[0].location));
                         }
                     }
                 }

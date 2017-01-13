@@ -4,50 +4,25 @@ import battlecode.common.*;
 
 public class GardenerBot extends BaseBot
 {
-    private static final Direction holeTowardsEnemy= here.directionTo(closetInitalEnemyArchonLocation());
-    private static final int roundSpawned = rc.getRoundNum();
-    private static Direction prevDirection = holeTowardsEnemy;
+    private static final Direction HOLE_TOWARDS_ENEMY = here.directionTo(closetInitalEnemyArchonLocation());
+    private static final int ROUND_SPAWNED = rc.getRoundNum();
+    private static Direction prevDirection = HOLE_TOWARDS_ENEMY;
     private static Direction bounce = Direction.getWest();
+    private static final int NUMBER_OF_GARDENERS_CHANNEL = 0;
+    private static final int NUMBER_OF_TREES_CHANNEL = 1;
+    private static int treesBuiltByMe = 0;
 
-    private static Direction getNextDirection(Direction prevDirection)
-    {
-        return prevDirection.rotateLeftDegrees(60);
-    }
-
-    private static int howManyTreesCanBePlanted(MapLocation location)
-    {
-        int howMany = 0;
-        Direction dir = location.directionTo(closetInitalEnemyArchonLocation());
-        for (int i = 0; i <= 360; i += 60)
-        {
-
-            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(2.2f).length == 0 &&
-                    rc.senseNearbyTrees(2.2f).length == 0)
-            {
-                howMany++;
-            }
-        }
-        return howMany;
-    }
-
-    private static void wander() throws GameActionException
-    {
-        if (!rc.hasMoved())
-        {
-            if (!rc.canMove(bounce))
-            {
-                bounce = randomDirection();
-            } else
-                tryMove(bounce);
-        }
-
-    }
 
     public static void runGardener() throws GameActionException
     {
+
         try
         {
-            while (rc.getRoundNum() - roundSpawned < 20 )
+            int numGardenersAlreadyOnMap = rc.readBroadcast(NUMBER_OF_GARDENERS_CHANNEL);
+            rc.broadcast(NUMBER_OF_GARDENERS_CHANNEL,numGardenersAlreadyOnMap+1);
+            System.out.println("Spawned at " + ROUND_SPAWNED);
+            wander();
+            while (rc.getRoundNum() - ROUND_SPAWNED < 20 )
             {
                 here = rc.getLocation();
                 if (howManyTreesCanBePlanted(here) >= 4)
@@ -60,11 +35,13 @@ public class GardenerBot extends BaseBot
         {
             e.printStackTrace();
         }
+        System.out.println("First 20 rounds for me done at " + rc.getRoundNum());
 
         while (true)
         {
             try
             {
+                int numTreesAlreadyOnMap = rc.readBroadcast(NUMBER_OF_TREES_CHANNEL);
                 updateRobotInfos();
                 if (bulletsInSenseRadius.length > 0)
                 {
@@ -113,23 +90,34 @@ public class GardenerBot extends BaseBot
                 }
 
                 Direction dir = getNextDirection(prevDirection);
-                if (rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && dir != holeTowardsEnemy)
+                if (rc.hasTreeBuildRequirements() && rc.canPlantTree(dir) && (haveAllPreviousGardenersBuiltTheirTrees() || treesBuiltByMe < 5))
                 {
-                    rc.plantTree(dir);
-                    prevDirection = dir;
+                    if(Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) >= 56 )
+                    {
+                        rc.plantTree(dir);
+                        rc.broadcast(NUMBER_OF_TREES_CHANNEL,numTreesAlreadyOnMap+1);
+                        treesBuiltByMe++;
+                        prevDirection = dir;
+                    }
                 }
-                else if(rc.hasRobotBuildRequirements(RobotType.LUMBERJACK) && rc.canBuildRobot(RobotType.LUMBERJACK,dir) && dir==holeTowardsEnemy && rc.getRoundNum()>500)
+                else if(rc.hasRobotBuildRequirements(RobotType.LUMBERJACK) && rc.canBuildRobot(RobotType.LUMBERJACK,dir))
                 {
-                    rc.buildRobot(RobotType.LUMBERJACK,dir);
-                    prevDirection = dir;
+                    if(Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) < 56)
+                    {
+                        rc.buildRobot(RobotType.LUMBERJACK, dir);
+                        prevDirection = dir;
+                    }
                 }
                 visibleAlliedTrees = rc.senseNearbyTrees(1.5f, us);
                 if (visibleAlliedTrees.length > 0)
                 {
                     for (int i = visibleAlliedTrees.length; i-- > 0; )
                     {
-                        rc.water(visibleAlliedTrees[i].getID());
-                        Clock.yield();
+                        if(rc.canWater(visibleAlliedTrees[i].getID()))
+                        {
+                            rc.water(visibleAlliedTrees[i].getID());
+                            Clock.yield();
+                        }
                     }
                 }
                 Clock.yield();
@@ -138,5 +126,46 @@ public class GardenerBot extends BaseBot
                 e.printStackTrace();
             }
         }
+    }
+
+
+    private static Direction getNextDirection(Direction prev)
+    {
+        return prev.rotateLeftDegrees(60);
+    }
+
+    private static boolean haveAllPreviousGardenersBuiltTheirTrees() throws GameActionException{
+        int numGardeners = rc.readBroadcast(NUMBER_OF_GARDENERS_CHANNEL);
+        int numTrees = rc.readBroadcast(NUMBER_OF_TREES_CHANNEL);
+        return (numTrees/numGardeners >= 4 || numGardeners == 0 || numTrees == 0);
+    }
+
+    private static int howManyTreesCanBePlanted(MapLocation location)
+    {
+        int howMany = 0;
+        Direction dir = location.directionTo(closetInitalEnemyArchonLocation());
+        for (int i = 0; i <= 360; i += 60)
+        {
+
+            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(2.2f).length == 0 &&
+                    rc.senseNearbyTrees(2.2f).length == 0)
+            {
+                howMany++;
+            }
+        }
+        return howMany;
+    }
+
+    private static void wander() throws GameActionException
+    {
+        if (!rc.hasMoved())
+        {
+            if (!rc.canMove(bounce))
+            {
+                bounce = randomDirection();
+            } else
+                tryMove(bounce);
+        }
+
     }
 }
