@@ -4,6 +4,8 @@ import battlecode.common.*;
 
 
 public class BaseBot {
+    public static int NUM_GARDENERS_CHANNEL = GameConstants.BROADCAST_MAX_CHANNELS - 4;
+    public static final int NUM_TREES_CHANNEL = 1;
     public static RobotController rc;
     public static MapLocation here;
     public static Team us;

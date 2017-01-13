@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class ArchonBot extends BaseBot
 {
-    private static int NUM_GARDENERS_CHANNEL = GameConstants.BROADCAST_MAX_CHANNELS - 4;
+
 
     public static void runArchon() throws GameActionException
     {
@@ -53,8 +53,9 @@ public class ArchonBot extends BaseBot
                         }
                     }
                 }
-                Direction dir = new Direction((float) Math.random() * 2 * (float) Math.PI);
-                if (rc.canHireGardener(dir) && rc.readBroadcast(NUM_GARDENERS_CHANNEL) < 14)
+                //Direction dir = new Direction((float) Math.random() * 2 * (float) Math.PI);
+                Direction dir = rc.getLocation().directionTo(centerOfTheirInitialArchons).rotateLeftDegrees((float)(Math.random()*(180) - 90));
+                if (rc.canHireGardener(dir) && gardenersPresentHaveDoneTheirJob() && rc.readBroadcast(NUM_GARDENERS_CHANNEL) < 14)
                 {
                     rc.hireGardener(dir);
                     rc.broadcast(NUM_GARDENERS_CHANNEL, (rc.readBroadcast(NUM_GARDENERS_CHANNEL) + 1));
@@ -68,6 +69,18 @@ public class ArchonBot extends BaseBot
             {
                 e.printStackTrace();
             }
+
+
         }
+    }
+
+    private static boolean gardenersPresentHaveDoneTheirJob() throws GameActionException
+    {
+        int numGardeners = rc.readBroadcast(NUM_GARDENERS_CHANNEL);
+        int numTrees = rc.readBroadcast(NUM_TREES_CHANNEL);
+        if (numGardeners == 0 || numTrees == 0)
+            return true;
+        else return (numTrees/numGardeners >= 2);
+
     }
 }
