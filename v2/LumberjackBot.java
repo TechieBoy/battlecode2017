@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class LumberjackBot extends BaseBot
 {
-    private static Direction bounce = Direction.getEast();
+    private static Direction bounce = here.directionTo(centerOfTheirInitialArchons);
 
     private static void wander() throws GameActionException
     {
@@ -12,7 +12,7 @@ public class LumberjackBot extends BaseBot
         {
             if (!rc.canMove(bounce))
             {
-                bounce = randomDirection();
+                bounce = here.directionTo(closetInitalEnemyArchonLocation()).rotateLeftDegrees(((float)Math.random()*100) - 40);
             } else
                 tryMove(bounce);
         }
@@ -41,10 +41,7 @@ public class LumberjackBot extends BaseBot
                     }
                     else
                     {
-                        if (rc.canMove(here.directionTo(info[0].location)))
-                        {
-                            rc.move(here.directionTo(info[0].location));
-                        }
+                        tryMove(here.directionTo(info[0].location));
                     }
                 }
                 else{

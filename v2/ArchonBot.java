@@ -62,7 +62,7 @@ public class ArchonBot extends BaseBot
                 }
                 if (rc.getTeamBullets() > 310)
                 {
-                    rc.donate(rc.getTeamBullets() - 310);
+                    rc.donate(100f);
                 }
                 Clock.yield();
             } catch (Exception e)
@@ -78,9 +78,9 @@ public class ArchonBot extends BaseBot
     {
         int numGardeners = rc.readBroadcast(NUM_GARDENERS_CHANNEL);
         int numTrees = rc.readBroadcast(NUM_TREES_CHANNEL);
-        if (numGardeners == 0 || numTrees == 0)
+        if (numGardeners == 0)
             return true;
-        else return (numTrees/numGardeners >= 2);
+        else return (numTrees/numGardeners >= 3);
 
     }
 }

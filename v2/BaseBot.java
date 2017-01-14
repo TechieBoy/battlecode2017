@@ -109,7 +109,7 @@ public class BaseBot {
     }
 
     public static boolean tryMove(Direction dir) throws GameActionException {
-        return tryMove(dir,25,3);
+        return tryMove(dir,20,5);
     }
 
     public static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {

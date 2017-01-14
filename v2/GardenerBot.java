@@ -6,8 +6,8 @@ public class GardenerBot extends BaseBot
 {
     private static final Direction HOLE_TOWARDS_ENEMY = here.directionTo(closetInitalEnemyArchonLocation());
     private static final int ROUND_SPAWNED = rc.getRoundNum();
-    private static Direction prevDirection = HOLE_TOWARDS_ENEMY;
-    private static Direction bounce = Direction.getSouth();
+    private static Direction prevDirection = Direction.getNorth().rotateRightDegrees(60);
+    private static Direction bounce = here.directionTo(centerOfTheirInitialArchons);
 
     private static int treesBuiltByMe = 0;
 
@@ -20,7 +20,7 @@ public class GardenerBot extends BaseBot
             while (true)
             {
                 here = rc.getLocation();
-                if ((howManyTreesCanBePlanted(here) >= 4 || rc.getRoundNum() - ROUND_SPAWNED > 60) && here.distanceTo(closetInitalAlliedArchonLocation()) > 10 )
+                if ((howManyTreesCanBePlanted(here) >= 4 || rc.getRoundNum() - ROUND_SPAWNED > 60) && here.distanceTo(closetInitalAlliedArchonLocation()) > 5 )
                 {
                     break;
                 } else if (!rc.hasMoved())
@@ -41,28 +41,31 @@ public class GardenerBot extends BaseBot
                 Direction dir = getNextDirection(prevDirection);
                 here = rc.getLocation();
                 rc.setIndicatorDot(here.add(dir,2),255,0,0);
-                if (rc.hasTreeBuildRequirements() && (haveAllPreviousGardenersBuiltTheirTrees() || treesBuiltByMe < 5))
+                if(Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) >= 30)
                 {
+                    if (rc.hasTreeBuildRequirements() && (haveAllPreviousGardenersBuiltTheirTrees() || treesBuiltByMe < 5))
+                    {
+                        if(rc.canPlantTree(dir))
+                        {
+                                rc.plantTree(dir);
+                                rc.broadcast(NUM_TREES_CHANNEL, numTreesAlreadyOnMap + 1);
+                                treesBuiltByMe++;
+                        }
+                    }
+                }
+                else if(Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) < 30)
+                {
+                        if (rc.hasRobotBuildRequirements(RobotType.LUMBERJACK))
+                        {
+                            if (rc.canBuildRobot(RobotType.LUMBERJACK, dir))
+                            {
+                                rc.buildRobot(RobotType.LUMBERJACK, dir);
+                            }
+                        }
 
-                    if(rc.canPlantTree(dir) && Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) >= 56 )
-                    {
-                        rc.plantTree(dir);
-                        rc.broadcast(NUM_TREES_CHANNEL,numTreesAlreadyOnMap+1);
-                        treesBuiltByMe++;
-                        prevDirection = dir;
-                    }
                 }
-                else if(rc.hasRobotBuildRequirements(RobotType.LUMBERJACK) && rc.canBuildRobot(RobotType.LUMBERJACK,dir))
-                {
-                    if(Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) < 56)
-                    {
-                        rc.buildRobot(RobotType.LUMBERJACK, dir);
-                        prevDirection = dir;
-                    }
-                }else if(!rc.onTheMap(here.add(dir,3.3f)))
-                {
-                    prevDirection = dir;
-                }
+                prevDirection = dir;
+
                 visibleAlliedTrees = rc.senseNearbyTrees(1.5f, us);
                 if (visibleAlliedTrees.length > 0)
                 {
@@ -82,7 +85,7 @@ public class GardenerBot extends BaseBot
             }
         }
     }
-
+    
     public static void dodgeBulletsAndDefend() throws GameActionException
     {
         bulletsInSenseRadius = rc.senseNearbyBullets();
@@ -153,8 +156,8 @@ public class GardenerBot extends BaseBot
         Direction dir = location.directionTo(closetInitalEnemyArchonLocation());
         for (int i = 0; i <= 360; i += 60)
         {
-            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(-1,us).length == 0 &&
-                    rc.senseNearbyTrees(2.2f).length == 0)
+            if (rc.canPlantTree(dir.rotateLeftDegrees(i)) && rc.senseNearbyRobots(3.8f,us).length == 0 &&
+                    rc.senseNearbyTrees(5f).length == 0)
             {
                 howMany++;
             }
