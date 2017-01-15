@@ -1,0 +1,105 @@
+15/1/17
+
+NUMBER 1 RANKED TEAM :
+sdrawrofsitisaemaseht (#8): (2-0) on SparseForest,MagicWood.
+    Dynamic Strategy, builds 1 Scout early which roams the map with his archon towards enemy archon, collecting bullets from trees.
+    Buils 1 lumberjack then soldiers, or multiple lumberjacks if his scouts and archons encounter lots of trees.
+    Lumberjacks only clear nearby trees, soldiers rush enemy archon if spotted.
+    Does not care about trees which contain robots, clears trees randomly.
+    Does not keep soldiers for defense, sends everyone to attack.(Lumberjacks might defend though)
+    Does not take victory points, prefers to build units.
+Possible Counter:
+    Defend against early scouts, get their gardeners first.
+    If map is pathfinding heavy, just turtle up while defending against singular attackers.
+Copy their:
+    Early game harrass.
+    Spawn pattern for units.
+
+Programmer-at-Arms (#366): (2-0) on DenseForest,MagicWood.
+    Gardener micro similar to ours.
+    Builds scouts early rushes.
+    Builds lumberjacks next, prioritize trees near archon.
+    Soldiers defend center of map.
+Possible counter:
+    Similar to sdraw.
+Copy their:
+    Nothing.
+
+4th place (#492): (2-0) on Barrier,Enclosure.
+    Archons move around and drop Gardeners,who build trees in place.
+    Gardeners never move unless enemies nearby.
+    Gardeners spawn lumberjack->soldier or scout->soldier repeatedly.
+    Only takes victory points if he has 10000 bullets.
+Possible Counter:
+    Attack him first or defend against his initial attack.
+    If his archon dies, gardeners are vulnerable as they tend to move out of their tree ring.
+Copy their:
+    Archon movement, but make it more unpredictable.
+
+Waterloo Omega Ruby (#133): (2-1) on SparseForest,shrine,hurdle.
+    Builds defensive ring of soldiers and lumberjacks around his archon, slowly expanding towards enemy archon.
+    Doesn't attack, only defends.
+    Strong defense, can't break defense mid to late game.
+    Sends scout towards enemy archon, but doesn't attack it?!
+    Gardeners plant trees spaced out.
+Possible counter:
+    Just build lots of gardeners and farm bullets before he reaches you.
+    His defense can be broken by rushing early game with scouts, once his defense is broken, send lumberjacks as his gardeners are not enclosed.
+Copy their:
+    Defense.
+
+Super Cow Powers (#764): (2-0) on DenseForest,SparseForest.
+    Builds scouts and lumberjacks.
+    Scouts rush, lumberjacks clear trees; if no nearby trees, lumberjacks also rush.
+    Gardeners build trees in a line, rather than surrounding themselves.
+Possible counter:
+    Defend and build trees faster.
+Copy their:
+    Nothing.
+
+Simplex (#89): (2-0) on Hurdle,Enclosure.
+    Similar to sdraw, but only builds scouts throughout the game.
+Possible Counter:
+    Same as sdraw
+Copy their:
+    Scout movement.
+
+Team Amyr (#473): (2-0) on Barrier,Enclosure.
+    Only builds gardeners, Gardeners plant trees randomly but stay in the area to water them, surround themselves with trees after some turns.
+    Wins by reaching 1000 victory points faster.
+    Archon has almost no defense.
+Possible Counter:
+    Build scouts early and hunt gardeners.
+We could have won if:
+    Our gardeners had better spacing.
+    Our archon spawned gardeners in correct direction.
+    Devoted all resources only to bullet farming rather than lumberjacks.
+Copy their:
+    Nothing.
+
+PeopleMountainPeopleSea (#36): (2-0) on Barrier,DenseForest.
+    Builds some lumberjacks initially, afterwards completely surrounds gardeners with trees.
+    Has very good spacing.
+Possible Counter:
+    Build scouts and hunt.
+We could have won if:
+    Our lumberjacks got them faster.
+Copy their:
+    Spacing strategy.
+
+
+TODO :
+
+Possible Strategy:
+    Build scouts and soldiers early.
+    Hunt Gardeners first then archon.
+    If they only have a single archon hunt him first.
+    Build atleast one soldier early for defense only.
+
+Improvements over current:
+    Soldiers and scouts should avoid bullets.
+    Avoid friendly fire.
+    Gardeners need better spacing.
+    Archon needs better spawning pattern.
+    Archon needs better movement.
+    Archon needs to spawn gardeners properly.
