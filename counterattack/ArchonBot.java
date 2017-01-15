@@ -11,38 +11,8 @@ public class ArchonBot extends BaseBot
             try
             {
                 updateRobotInfos();
-                if(rc.getHealth() < RobotType.ARCHON.maxHealth/1.5 && visibleEnemies.length > 0)
-                {
-                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,1);
-                    rc.broadcast(FRIENDLY_ARCHON_X,(int)rc.getLocation().x);
-                    rc.broadcast(FRIENDLY_ARCHON_X,(int)rc.getLocation().y);
-                }
-                else
-                {
-                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
-                }
-
-//                if (rc.readBroadcast(URGENTLY_NEED_GARDENERS_CHANNEL) == 1)
-//                {
-//                    while (true)
-//                    {
-//                        Direction gardenerDir = Direction.getEast();
-//                        for (int i = 0; i < 360; i += 10)
-//                        {
-//                            if (rc.canHireGardener(gardenerDir))
-//                            {
-//                                rc.hireGardener(gardenerDir);
-//                                rc.broadcast(NUM_GARDENERS_CHANNEL,(rc.readBroadcast(NUM_GARDENERS_CHANNEL)+1));
-//                            }
-//                        }
-//
-//                        if (rc.readBroadcast(NUM_GARDENERS_CHANNEL) >= 3)
-//                        {
-//                            rc.broadcast(URGENTLY_NEED_GARDENERS_CHANNEL, 0);
-//                            break;
-//                        }
-//                    }
-//                }
+                callForHelpIfInDanger();
+                tryDodge();
                 Direction dir = null;
                 here = rc.getLocation();
                 Direction d = here.directionTo(centerOfTheirInitialArchons);
@@ -78,6 +48,7 @@ public class ArchonBot extends BaseBot
                             }
                         }
                     }
+                    clearGlobalFlags();
                     Clock.yield();
                 } catch(Exception e)
                 {
@@ -88,7 +59,16 @@ public class ArchonBot extends BaseBot
             }
         }
 
-        private static void tryDodge() throws GameActionException
+    private static void clearGlobalFlags() throws GameActionException
+    {
+        if(rc.getRoundNum() > 700)
+        {
+            rc.broadcast(FOUND_ENEMY_ARCHON_CHANNEL, 0);
+            rc.broadcast(FOUND_ENEMY_GARDENER_CHANNEL, 0);
+        }
+    }
+
+    private static void tryDodge() throws GameActionException
         {
             if (bulletsInSenseRadius.length > 0)
             {
@@ -125,6 +105,20 @@ public class ArchonBot extends BaseBot
                 if(rc.canMove(oppToFirstEnemy) && !rc.hasMoved()){
                     tryMove(oppToFirstEnemy);
                 }
+            }
+        }
+
+        private static void callForHelpIfInDanger() throws GameActionException
+        {
+            if(rc.getHealth() < RobotType.ARCHON.maxHealth/1.5 && visibleEnemies.length > 0)
+            {
+                rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,1);
+                rc.broadcast(FRIENDLY_ARCHON_X,(int)rc.getLocation().x);
+                rc.broadcast(FRIENDLY_ARCHON_X,(int)rc.getLocation().y);
+            }
+            else
+            {
+                rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
             }
         }
 

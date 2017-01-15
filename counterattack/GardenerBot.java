@@ -18,7 +18,9 @@ public class GardenerBot extends BaseBot
     {
         try
         {
+
             visibleEnemies = rc.senseNearbyRobots(-1,them);
+            callForHelpIfInDanger();
             if(rc.getHealth() < RobotType.GARDENER.maxHealth/10 && visibleEnemies.length>0)
             {
                 rc.broadcast(NUM_GARDENERS_CHANNEL,(rc.readBroadcast(NUM_GARDENERS_CHANNEL)-1));
@@ -36,12 +38,6 @@ public class GardenerBot extends BaseBot
                 {
                     if(rc.senseNearbyTrees(-1,Team.NEUTRAL).length > 2)
                         urgentlyNeedLumberJacks = true;
-//                    if (howManyTreesCanBePlanted(here) <= 3)
-//                    {
-//                        urgentlyNeedLumberJacks = true;
-////                        if (rc.readBroadcast(NUM_GARDENERS_CHANNEL) < 2)
-////                            rc.broadcast(URGENTLY_NEED_GARDENERS_CHANNEL, 1);
-//                    }
                     break;
                 } else if (!rc.hasMoved())
                     wander();
@@ -86,8 +82,7 @@ public class GardenerBot extends BaseBot
                     }
                     prevDirection = dir;
                 }
-                else if (Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) < 30 && /*(rc.readBroadcast(URGENTLY_NEED_GARDENERS_CHANNEL) != 1)*/
-                         rc.getTreeCount() >= 2)
+                else if (Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) < 30 && rc.getTreeCount() >= 2)
                 {
 
                     if(needScouts())
@@ -155,6 +150,20 @@ public class GardenerBot extends BaseBot
         }
     }
 
+    private static void callForHelpIfInDanger() throws GameActionException
+    {
+        if(rc.getHealth() < RobotType.GARDENER.maxHealth/1.5 && visibleEnemies.length > 0)
+        {
+            rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL,1);
+            rc.broadcast(FRIENDLY_GARDENER_X,(int)rc.getLocation().x);
+            rc.broadcast(FRIENDLY_GARDENER_Y,(int)rc.getLocation().y);
+        }
+        else
+        {
+            rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL,0);
+        }
+    }
+
 
     private static boolean needLumberjacks() throws GameActionException
     {
@@ -180,7 +189,7 @@ public class GardenerBot extends BaseBot
 
     private static boolean needScouts() throws GameActionException
     {
-        return  (rc.getTeamBullets() > 250);
+        return  (rc.senseNearbyTrees(-1,Team.NEUTRAL).length > 4);
 
     }
 

@@ -21,6 +21,9 @@ public class BaseBot {
     public static final int FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL = 15;
     public static final int FRIENDLY_ARCHON_X = 16;
     public static final int FRIENDLY_ARCHON_Y = 17;
+    public static final int FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL = 18;
+    public static final int FRIENDLY_GARDENER_X = 19;
+    public static final int FRIENDLY_GARDENER_Y = 20;
 
     public static RobotController rc;
     public static MapLocation here;
@@ -78,6 +81,40 @@ public class BaseBot {
 
         //prevDirection = here.directionTo(centerOfTheirInitialArchons);
         //currentMotionType = motionType.direct;
+    }
+
+    public static boolean respondToBroadCasts() throws GameActionException
+    {
+        here = rc.getLocation();
+        boolean friendlyArchonUnderAttack = rc.readBroadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL) == 1;
+        if(friendlyArchonUnderAttack)
+        {
+            MapLocation friendlyArchonLocation = new MapLocation((float)rc.readBroadcast(FRIENDLY_ARCHON_X),(int)rc.readBroadcast(FRIENDLY_ARCHON_Y));
+            tryMove(here.directionTo(friendlyArchonLocation));
+            return true;
+        }
+        boolean friendlyGardenerUnderAttack = rc.readBroadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL) == 1;
+        if(friendlyGardenerUnderAttack)
+        {
+            MapLocation friendlyGardenerLocation = new MapLocation((float)rc.readBroadcast(FRIENDLY_GARDENER_X),(int)rc.readBroadcast(FRIENDLY_GARDENER_Y));
+            tryMove(here.directionTo(friendlyGardenerLocation));
+            return true;
+        }
+        boolean foundArchon = rc.readBroadcast(FOUND_ENEMY_ARCHON_CHANNEL) == 1;
+        if(foundArchon)
+        {
+            MapLocation enemyArchonLocation = new MapLocation((float)rc.readBroadcast(ENEMY_ARCHON_X),(int)rc.readBroadcast(ENEMY_ARCHON_Y));
+            tryMove(here.directionTo(enemyArchonLocation));
+            return true;
+        }
+        boolean foundEnemyGardener = rc.readBroadcast(FOUND_ENEMY_GARDENER_CHANNEL) == 1;
+        if(foundEnemyGardener)
+        {
+            MapLocation enemyGardenerLocation = new MapLocation((float)rc.readBroadcast(ENEMY_GARDENER_X),(int)rc.readBroadcast(ENEMY_GARDENER_Y));
+            tryMove(here.directionTo(enemyGardenerLocation));
+            return true;
+        }
+        return false;
     }
 
     public static MapLocation closetInitalEnemyArchonLocation()
@@ -138,19 +175,26 @@ public class BaseBot {
 
         int currentCheck = 1;
 
-        while(currentCheck<=checksPerSide) {
-            // Try the offset of the left side
-            if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
-                rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
-                return true;
+        if(!rc.hasMoved())
+        {
+
+            while (currentCheck <= checksPerSide)
+            {
+                // Try the offset of the left side
+                if (rc.canMove(dir.rotateLeftDegrees(degreeOffset * currentCheck)))
+                {
+                    rc.move(dir.rotateLeftDegrees(degreeOffset * currentCheck));
+                    return true;
+                }
+                // Try the offset on the right side
+                if (rc.canMove(dir.rotateRightDegrees(degreeOffset * currentCheck)))
+                {
+                    rc.move(dir.rotateRightDegrees(degreeOffset * currentCheck));
+                    return true;
+                }
+                // No move performed, try slightly further
+                currentCheck++;
             }
-            // Try the offset on the right side
-            if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
-                rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
-                return true;
-            }
-            // No move performed, try slightly further
-            currentCheck++;
         }
 
         // A move never happened, so return false.
