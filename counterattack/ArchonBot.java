@@ -4,8 +4,6 @@ import battlecode.common.*;
 
 public class ArchonBot extends BaseBot
 {
-    private static Direction bounce = here.directionTo(centerOfAllInitialArchons);
-
     public static void runArchon() throws GameActionException
     {
         while (true)
@@ -13,63 +11,38 @@ public class ArchonBot extends BaseBot
             try
             {
                 updateRobotInfos();
-                if (bulletsInSenseRadius.length > 0)
+                if(rc.getHealth() < RobotType.ARCHON.maxHealth/1.5 && visibleEnemies.length > 0)
                 {
-                    for (int i = bulletsInSenseRadius.length - 1; i-- > 0; )
-                    {
-                        // Get relevant bullet information
-                        Direction propagationDirection = bulletsInSenseRadius[i].dir;
-                        MapLocation bulletLocation = bulletsInSenseRadius[i].location;
-
-                        // Calculate bullet relations to this robot
-                        Direction directionToRobot = bulletLocation.directionTo(here);
-                        float theta = propagationDirection.radiansBetween(directionToRobot);
-                        float distToRobot = bulletLocation.distanceTo(here);
-                        float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
-
-                        // If theta > 90 degrees, then the bullet is traveling away from us and we can break early
-                        if (Math.abs(theta) < Math.PI / 2 && perpendicularDist <= rc.getType().bodyRadius)
-                        {
-                            if (rc.canMove(directionToRobot.getWest()))
-                            {
-                                tryMove(directionToRobot.getWest());
-                            } else if (rc.canMove(directionToRobot.getEast()))
-                            {
-                                tryMove(directionToRobot.getEast());
-                            }
-                            break;
-                        }
-                    }
-                } else if (!rc.hasMoved() && visibleEnemies.length > 0)
-                {
-                    here = rc.getLocation();
-                    RobotInfo firstEnemy = visibleEnemies[0];
-                    Direction oppToFirstEnemy = firstEnemy.location.directionTo(here);
-                    if(rc.canMove(oppToFirstEnemy) && !rc.hasMoved()){
-                        tryMove(oppToFirstEnemy);
-                    }
+                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,1);
+                    rc.broadcast(FRIENDLY_ARCHON_X,(int)rc.getLocation().x);
+                    rc.broadcast(FRIENDLY_ARCHON_X,(int)rc.getLocation().y);
                 }
-                if (rc.readBroadcast(URGENTLY_NEED_GARDENERS_CHANNEL) == 1)
+                else
                 {
-                    while (true)
-                    {
-                        Direction gardenerDir = Direction.getEast();
-                        for (int i = 0; i < 360; i += 10)
-                        {
-                            if (rc.canHireGardener(gardenerDir))
-                            {
-                                rc.hireGardener(gardenerDir);
-                                rc.broadcast(NUM_GARDENERS_CHANNEL,(rc.readBroadcast(NUM_GARDENERS_CHANNEL)+1));
-                            }
-                        }
-
-                        if (rc.readBroadcast(NUM_GARDENERS_CHANNEL) >= 3)
-                        {
-                            rc.broadcast(URGENTLY_NEED_GARDENERS_CHANNEL, 0);
-                            break;
-                        }
-                    }
+                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
                 }
+
+//                if (rc.readBroadcast(URGENTLY_NEED_GARDENERS_CHANNEL) == 1)
+//                {
+//                    while (true)
+//                    {
+//                        Direction gardenerDir = Direction.getEast();
+//                        for (int i = 0; i < 360; i += 10)
+//                        {
+//                            if (rc.canHireGardener(gardenerDir))
+//                            {
+//                                rc.hireGardener(gardenerDir);
+//                                rc.broadcast(NUM_GARDENERS_CHANNEL,(rc.readBroadcast(NUM_GARDENERS_CHANNEL)+1));
+//                            }
+//                        }
+//
+//                        if (rc.readBroadcast(NUM_GARDENERS_CHANNEL) >= 3)
+//                        {
+//                            rc.broadcast(URGENTLY_NEED_GARDENERS_CHANNEL, 0);
+//                            break;
+//                        }
+//                    }
+//                }
                 Direction dir = null;
                 here = rc.getLocation();
                 Direction d = here.directionTo(centerOfTheirInitialArchons);
@@ -88,7 +61,7 @@ public class ArchonBot extends BaseBot
                         rc.hireGardener(dir);
                         rc.broadcast(NUM_GARDENERS_CHANNEL,(rc.readBroadcast(NUM_GARDENERS_CHANNEL)+1));
                     }
-                    if (rc.getTeamBullets() > 310)
+                    if (rc.getTeamBullets() > 410)
                     {
                         rc.donate(100f);
                     }
@@ -115,18 +88,46 @@ public class ArchonBot extends BaseBot
             }
         }
 
-    private static void wander() throws GameActionException
-    {
-        if (!rc.hasMoved())
+        private static void tryDodge() throws GameActionException
         {
-            if (!rc.canMove(bounce))
+            if (bulletsInSenseRadius.length > 0)
             {
-                bounce = randomDirection();
-            } else
-                tryMove(bounce);
+                for (int i = bulletsInSenseRadius.length - 1; i-- > 0; )
+                {
+                    // Get relevant bullet information
+                    Direction propagationDirection = bulletsInSenseRadius[i].dir;
+                    MapLocation bulletLocation = bulletsInSenseRadius[i].location;
+
+                    // Calculate bullet relations to this robot
+                    Direction directionToRobot = bulletLocation.directionTo(here);
+                    float theta = propagationDirection.radiansBetween(directionToRobot);
+                    float distToRobot = bulletLocation.distanceTo(here);
+                    float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
+
+                    // If theta > 90 degrees, then the bullet is traveling away from us and we can break early
+                    if (Math.abs(theta) < Math.PI / 2 && perpendicularDist <= rc.getType().bodyRadius)
+                    {
+                        if (rc.canMove(directionToRobot.getWest()))
+                        {
+                            tryMove(directionToRobot.getWest());
+                        } else if (rc.canMove(directionToRobot.getEast()))
+                        {
+                            tryMove(directionToRobot.getEast());
+                        }
+                        break;
+                    }
+                }
+            } else if (!rc.hasMoved() && visibleEnemies.length > 0)
+            {
+                here = rc.getLocation();
+                RobotInfo firstEnemy = visibleEnemies[0];
+                Direction oppToFirstEnemy = firstEnemy.location.directionTo(here);
+                if(rc.canMove(oppToFirstEnemy) && !rc.hasMoved()){
+                    tryMove(oppToFirstEnemy);
+                }
+            }
         }
 
-    }
 
     private static boolean isViableToSpawnGardeners() throws GameActionException
     {

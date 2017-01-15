@@ -36,14 +36,18 @@ public class ScoutBot extends BaseBot
                 visibleEnemies = rc.senseNearbyRobots(-1,them);
                 if (visibleEnemies.length > 0)
                 {
-                    if (rc.canFireSingleShot() && rc.getTeamBullets() > 120)
+                    for(RobotInfo robotInfo : visibleEnemies)
                     {
-                        rc.fireSingleShot(rc.getLocation().directionTo(visibleEnemies[0].location));
+                        if(robotInfo.getType() == RobotType.ARCHON)
+                        {
+                           broadcastEnemyLocationAndAttack(FOUND_ENEMY_ARCHON_CHANNEL,ENEMY_ARCHON_X,ENEMY_ARCHON_Y,robotInfo);
+                        }
+                        else if(robotInfo.getType() == RobotType.GARDENER)
+                        {
+                            broadcastEnemyLocationAndAttack(FOUND_ENEMY_GARDENER_CHANNEL,ENEMY_GARDENER_X,ENEMY_GARDENER_Y,robotInfo);
+                        }
                     }
-                    else if(!rc.hasMoved())
-                    {
-                        tryMove(here.directionTo(visibleEnemies[0].location));
-                    }
+
                     here = rc.getLocation();
                     visibleEnemies = rc.senseNearbyRobots(-1,them);
                 }
@@ -55,6 +59,22 @@ public class ScoutBot extends BaseBot
             {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static void broadcastEnemyLocationAndAttack(int status,int x,int y, RobotInfo robotInfo) throws GameActionException
+    {
+        here = rc.getLocation();
+        rc.broadcast(status,1);
+        rc.broadcast(x,(int)robotInfo.location.x);
+        rc.broadcast(y,(int)robotInfo.location.y);
+        if (rc.canFireSingleShot() && rc.getTreeCount() > 1)
+        {
+            rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location));
+        }
+        else if(!rc.hasMoved())
+        {
+            tryMove(here.directionTo(robotInfo.location));
         }
     }
 

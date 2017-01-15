@@ -5,7 +5,6 @@ import battlecode.common.*;
 
 public class BaseBot {
     public static final int NUM_GARDENERS_CHANNEL = 0;
-    public static final int NUM_TREES_CHANNEL = 1;
     public static final int URGENTLY_NEED_GARDENERS_CHANNEL = 2;
     public static final int NUM_LUMBERJACKS_CHANNEL = 3;
     public static final int NUM_SCOUTS_CHANNEL = 4;
@@ -13,6 +12,16 @@ public class BaseBot {
     public static final int SCOUT_FOUND_CONTAINED_TANK_CHANNEL = 6;
     public static final int CONTAINED_TANK_X_CHANNEL = 7;
     public static final int CONTAINED_TANK_Y_CHANNEL = 8;
+    public static final int FOUND_ENEMY_ARCHON_CHANNEL = 9;
+    public static final int ENEMY_ARCHON_X = 10;
+    public static final int ENEMY_ARCHON_Y = 11;
+    public static final int FOUND_ENEMY_GARDENER_CHANNEL = 12;
+    public static final int ENEMY_GARDENER_X = 13;
+    public static final int ENEMY_GARDENER_Y = 14;
+    public static final int FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL = 15;
+    public static final int FRIENDLY_ARCHON_X = 16;
+    public static final int FRIENDLY_ARCHON_Y = 17;
+
     public static RobotController rc;
     public static MapLocation here;
     public static Team us;
