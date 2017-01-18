@@ -32,7 +32,6 @@ public class ScoutBot extends BaseBot
             {
                 if (rc.readBroadcast(EARLY_GAME_SCOUT_SPAWNED_CHANNEL) == 0)
                     rc.broadcast(EARLY_GAME_SCOUT_SPAWNED_CHANNEL, 1);
-                findTreeBulletsAndTanks();
 
                 visibleEnemies = rc.senseNearbyRobots(-1, them);
                 if (visibleEnemies.length > 0)
@@ -54,16 +53,51 @@ public class ScoutBot extends BaseBot
                         else if (robotInfo.getType() == RobotType.GARDENER)
                         {
                             broadcastEnemyLocation(FOUND_ENEMY_GARDENER_CHANNEL, ENEMY_GARDENER_X, ENEMY_GARDENER_Y, robotInfo);
-                            while(true)
+                            while(rc.canSenseRobot(robotInfo.ID))
                             {
-                                if (rc.canFireSingleShot() && rc.getTreeCount() > 1)
-                                {
-                                    rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location).rotateLeftDegrees(10));
-                                } else if (!rc.hasMoved())
+                                robotInfo = rc.senseRobot(robotInfo.ID);
+                                here = rc.getLocation();
+                                if(here.distanceTo(robotInfo.location)>2.5*robotInfo.getRadius())
                                 {
                                     tryMove(here.directionTo(robotInfo.location));
-                                } else{
-                                    break;
+                                }
+                                else
+                                {
+                                    visibleEnemyTrees = rc.senseNearbyTrees(-1,them);
+                                    if(visibleEnemyTrees.length>0)
+                                    {
+                                        MapLocation treeLocation= visibleEnemyTrees[0].location;
+                                        if(here.distanceTo(treeLocation)<rc.getType().strideRadius)
+                                        {
+                                            if(here.distanceTo(treeLocation)>0.01f && !rc.hasMoved() && rc.canMove(here.directionTo(treeLocation),here.distanceTo(treeLocation)))
+                                            {
+                                                rc.move(here.directionTo(treeLocation),here.distanceTo(treeLocation));
+                                            }
+                                            else
+                                            {
+                                                if(rc.canFireSingleShot())
+                                                {
+                                                    rc.fireSingleShot(here.directionTo(robotInfo.location).rotateLeftDegrees(29));
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            tryMove(here.directionTo(treeLocation));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (rc.canFireSingleShot())
+                                        {
+                                            rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location));
+                                        }
+                                        else if (!rc.hasMoved())
+                                        {
+                                            tryMove(here.directionTo(robotInfo.location));
+                                        }
+                                    }
+                                    Clock.yield();
                                 }
                             }
                         }
@@ -71,9 +105,10 @@ public class ScoutBot extends BaseBot
                 }
                 if (!rc.hasMoved())
                 {
-                    if (rc.getRoundNum() < 250)
+                    findTreeBulletsAndTanks();
+                    if (!rc.hasMoved() && rc.getRoundNum() < 250)
                         wander();
-                    else
+                    else if(!rc.hasMoved())
                         respondToBroadCasts();
                 }
                 Clock.yield();

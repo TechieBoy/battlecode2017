@@ -208,13 +208,17 @@ public class SoldierBot extends BaseBot
 
     private static boolean friendlyfire(RobotInfo enemyInfo) throws GameActionException
     {
-        Float howFarIllFire = here.distanceTo(enemyInfo.location);
-        RobotInfo[] alliesInRange = rc.senseNearbyRobots(enemyInfo.location,howFarIllFire,us);
-        if(alliesInRange.length == 0) return false;
-        if(alliesInRange.length<3 && alliesInRange[0].getHealth()>alliesInRange[0].getType().maxHealth/10)
-        {
-            return false;
-        }
-            return true;
+       if(enemyInfo!=null)
+       {
+           Float howFarIllFire = here.distanceTo(enemyInfo.location);
+           RobotInfo[] alliesInRange = rc.senseNearbyRobots(enemyInfo.location,howFarIllFire,us);
+           if(alliesInRange.length == 0) return false;
+           if(alliesInRange.length<3 && alliesInRange[0].getHealth()>alliesInRange[0].getType().maxHealth/10)
+           {
+               return false;
+           }
+           return true;
+       }
+       return false;
     }
 }
