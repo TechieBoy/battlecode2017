@@ -58,6 +58,18 @@ public class ArchonBot extends BaseBot
                         rc.donate(400f);
                     }
                     visibleAlliedTrees = rc.senseNearbyTrees(-1,us);
+                    friendlies = rc.senseNearbyRobots(-1,us);
+                    here = rc.getLocation();
+                    for(RobotInfo i : friendlies)
+                    {
+                        if(i.getType() == RobotType.GARDENER)
+                        {
+                            Direction oppToGardener = i.location.directionTo(here);
+                            if(rc.canMove(oppToGardener) && !rc.hasMoved()){
+                                tryMove(oppToGardener);
+                            }
+                        }
+                    }
                     if(visibleAlliedTrees.length > 0)
                     {
                         here = rc.getLocation();

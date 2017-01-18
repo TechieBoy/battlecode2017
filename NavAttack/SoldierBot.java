@@ -5,7 +5,9 @@ import battlecode.common.*;
 public class SoldierBot extends BaseBot
 {
     private static Direction bounce = here.directionTo(closetInitalEnemyArchonLocation());
+    private static Direction defensiveBounce = here.directionTo(closetInitalAlliedArchonLocation());
     private static RobotInfo myEnemy = null;
+    private static boolean onDefense = rc.getRoundNum() < 80;
     public static void runSoldier() throws GameActionException
     {
         while (true)
@@ -13,90 +15,146 @@ public class SoldierBot extends BaseBot
             try
             {
                 here = rc.getLocation();
-                visibleEnemies = rc.senseNearbyRobots(-1,them);
-                if (visibleEnemies.length > 0 && myEnemy == null)
+                visibleEnemies = rc.senseNearbyRobots(-1, them);
+                if (onDefense)
                 {
-                    for(RobotInfo robotInfo : visibleEnemies)
+                    if(visibleEnemies.length > 0)
                     {
-                        if(robotInfo.getType() == RobotType.ARCHON)
-                        {
-                            broadcastEnemyLocation(FOUND_ENEMY_ARCHON_CHANNEL, ENEMY_ARCHON_X, ENEMY_ARCHON_Y, robotInfo);
-                            myEnemy = robotInfo;
-                            if (rc.canFirePentadShot() && !friendlyfire(robotInfo))
-                            {
-                                rc.firePentadShot(rc.getLocation().directionTo(robotInfo.location));
-                            }
-                            if(rc.canMove(here.directionTo(robotInfo.location)))
-                            {
-                                tryMove(here.directionTo(robotInfo.location));
-                            }
-
-                        }
-                        else if(robotInfo.getType() == RobotType.GARDENER)
-                        {
-                            broadcastEnemyLocation(FOUND_ENEMY_GARDENER_CHANNEL, ENEMY_GARDENER_X, ENEMY_GARDENER_Y, robotInfo);
-                            myEnemy = robotInfo;
-                            if (rc.canFireTriadShot() && !friendlyfire(robotInfo))
-                            {
-                                rc.fireTriadShot(rc.getLocation().directionTo(robotInfo.location));
-                            }
-
-                        }
-                        else if(robotInfo.getType() == RobotType.TANK)
-                        {
-                            myEnemy = robotInfo;
-                            if (rc.canFirePentadShot() && !friendlyfire(robotInfo))
-                            {
-                                rc.firePentadShot(rc.getLocation().directionTo(robotInfo.location));
-                            }
-                            if(rc.canMove(here.directionTo(robotInfo.location)))
-                            {
-                                tryMove(here.directionTo(robotInfo.location));
-                            }
-                        }
+                        if (!rc.hasMoved())
+                            tryMove(here.directionTo(visibleEnemies[0].location));
                         else
                         {
-                            if (rc.canFireTriadShot() && !friendlyfire(robotInfo))
+                            if (here.distanceTo(visibleEnemies[0].location) < 2)
                             {
-                                rc.fireTriadShot(rc.getLocation().directionTo(robotInfo.location));
-                            }
-                            else if(rc.canFireSingleShot() && !friendlyfire(robotInfo))
+                                if (rc.canFirePentadShot() && !friendlyfire(visibleEnemies[0]))
+                                {
+                                    rc.firePentadShot(rc.getLocation().directionTo(visibleEnemies[0].location));
+                                }
+                            } else if (here.distanceTo(visibleEnemies[0].location) < 5)
                             {
-                                rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location));
+                                if (rc.canFireTriadShot() && !friendlyfire(visibleEnemies[0]))
+                                {
+                                    rc.fireTriadShot(rc.getLocation().directionTo(visibleEnemies[0].location));
+                                }
+                            } else
+                            {
+                                if (rc.canFireSingleShot() && !friendlyfire(visibleEnemies[0]))
+                                {
+                                    rc.fireSingleShot(rc.getLocation().directionTo(visibleEnemies[0].location));
+                                }
                             }
-                        }
-                    }
-                }
-                else if(visibleEnemies.length>0 && myEnemy!=null)
-                {
-                    if(rc.canSenseRobot(myEnemy.ID))
-                    {
-                        myEnemy = rc.senseRobot(myEnemy.ID);
-                        tryMove(here.directionTo(myEnemy.location));
-                        here = rc.getLocation();
-                        if (rc.canFirePentadShot() && !friendlyfire(myEnemy))
-                        {
-                            rc.firePentadShot(rc.getLocation().directionTo(myEnemy.location));
                         }
                     }
                     else
-                        myEnemy = null;
-                }
-                else
-                    respondToBroadCasts();
+                    {
+                        respondToDefensiveBroadCasts();
+                        if(!rc.hasMoved())
+                            defensiveWander();
+                    }
 
-                tryDodge();
-                if(!rc.hasMoved())
+                } else
                 {
-                    wander();
-                }
-                Clock.yield();
+                    if (visibleEnemies.length > 0 && myEnemy == null)
+                    {
+                        for (RobotInfo robotInfo : visibleEnemies)
+                        {
+                            if (robotInfo.getType() == RobotType.ARCHON)
+                            {
+                                broadcastEnemyLocation(FOUND_ENEMY_ARCHON_CHANNEL, ENEMY_ARCHON_X, ENEMY_ARCHON_Y, robotInfo);
+                                myEnemy = robotInfo;
+                                if (rc.canFirePentadShot() && !friendlyfire(robotInfo))
+                                {
+                                    rc.firePentadShot(rc.getLocation().directionTo(robotInfo.location));
+                                }
+                                if (rc.canMove(here.directionTo(robotInfo.location)))
+                                {
+                                    tryMove(here.directionTo(robotInfo.location));
+                                }
 
+                            } else if (robotInfo.getType() == RobotType.GARDENER)
+                            {
+                                broadcastEnemyLocation(FOUND_ENEMY_GARDENER_CHANNEL, ENEMY_GARDENER_X, ENEMY_GARDENER_Y, robotInfo);
+                                myEnemy = robotInfo;
+                                if (rc.canFireTriadShot() && !friendlyfire(robotInfo))
+                                {
+                                    rc.fireTriadShot(rc.getLocation().directionTo(robotInfo.location));
+                                }
+
+                            } else if (robotInfo.getType() == RobotType.TANK)
+                            {
+                                myEnemy = robotInfo;
+                                if (rc.canFirePentadShot() && !friendlyfire(robotInfo))
+                                {
+                                    rc.firePentadShot(rc.getLocation().directionTo(robotInfo.location));
+                                }
+                                if (rc.canMove(here.directionTo(robotInfo.location)))
+                                {
+                                    tryMove(here.directionTo(robotInfo.location));
+                                }
+                            }
+                            else
+                            {
+                                if (rc.canFireTriadShot() && !friendlyfire(robotInfo))
+                                {
+                                    rc.fireTriadShot(rc.getLocation().directionTo(robotInfo.location));
+                                } else if (rc.canFireSingleShot() && !friendlyfire(robotInfo))
+                                {
+                                    rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location));
+                                }
+                            }
+                        }
+                    } else if (visibleEnemies.length > 0 && myEnemy != null)
+                    {
+                        if (rc.canSenseRobot(myEnemy.ID))
+                        {
+                            myEnemy = rc.senseRobot(myEnemy.ID);
+                            tryMove(here.directionTo(myEnemy.location));
+                            here = rc.getLocation();
+                            if (rc.canFirePentadShot() && !friendlyfire(myEnemy))
+                            {
+                                rc.firePentadShot(rc.getLocation().directionTo(myEnemy.location));
+                            }
+                        } else
+                            myEnemy = null;
+                    } else
+                        respondToBroadCasts();
+
+                    tryDodge();
+                    if (!rc.hasMoved())
+                    {
+                        wander();
+                    }
+                    Clock.yield();
+
+                }
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static void defensiveWander() throws GameActionException
+    {
+        if (!rc.hasMoved())
+        {
+            if (!rc.canMove(defensiveBounce))
+            {
+                here = rc.getLocation();
+                visibleAlliedTrees = rc.senseNearbyTrees(-1,us);
+                Direction dir = null;
+                if(visibleAlliedTrees.length > 0){
+                    dir = here.directionTo(visibleAlliedTrees[0].location);
+                }
+                else
+                {
+                    dir = here.directionTo(closetInitalAlliedArchonLocation());
+                }
+                defensiveBounce = dir.rotateLeftDegrees((float) ((Math.random() * 180) - 90));
+
+            } else
+                tryMove(defensiveBounce);
         }
     }
 
@@ -115,6 +173,40 @@ public class SoldierBot extends BaseBot
         }
 
     }
+
+    private static boolean respondToDefensiveBroadCasts() throws GameActionException
+    {
+        here = rc.getLocation();
+        boolean friendlyArchonUnderAttack = rc.readBroadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL) == 1;
+        boolean friendlyGardenerUnderAttack = rc.readBroadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL) == 1;
+        if(friendlyGardenerUnderAttack)
+        {
+            MapLocation friendlyGardenerLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_GARDENER_X)),Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_GARDENER_Y)));
+            if(here.isWithinDistance(friendlyGardenerLocation,RobotType.SOLDIER.sensorRadius/2))
+            {
+                if(rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadius/2,them).length == 0)
+                    rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL,0);
+            }
+            else
+                tryMove(here.directionTo(friendlyGardenerLocation));
+            return true;
+        }
+        else if(friendlyArchonUnderAttack)
+        {
+            MapLocation friendlyArchonLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_X)),Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_Y)));
+            if(here.isWithinDistance(friendlyArchonLocation,RobotType.SOLDIER.sensorRadius))
+            {
+                if(rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadius,them).length == 0)
+                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
+            }
+            else
+                tryMove(here.directionTo(friendlyArchonLocation));
+            return true;
+        }
+        return false;
+    }
+
+
     private static boolean respondToBroadCasts() throws GameActionException
     {
         here = rc.getLocation();
@@ -212,7 +304,13 @@ public class SoldierBot extends BaseBot
        {
            Float howFarIllFire = here.distanceTo(enemyInfo.location);
            RobotInfo[] alliesInRange = rc.senseNearbyRobots(enemyInfo.location,howFarIllFire,us);
-           if(alliesInRange.length == 0) return false;
+           for(RobotInfo i:alliesInRange)
+           {
+               if(i.getType() == RobotType.ARCHON || i.getType() == RobotType.GARDENER)
+                   return true;
+           }
+           if(alliesInRange.length == 0)
+               return false;
            if(alliesInRange.length<3 && alliesInRange[0].getHealth()>alliesInRange[0].getType().maxHealth/10)
            {
                return false;

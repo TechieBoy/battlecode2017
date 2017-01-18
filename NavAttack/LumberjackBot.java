@@ -42,11 +42,13 @@ public class LumberjackBot extends BaseBot
         {
             try
             {
-//                here = rc.getLocation();
-//                bugNav(closetInitalEnemyArchonLocation());
+
                 respondToBroadCasts();
                 here = rc.getLocation();
                 visibleEnemies = rc.senseNearbyRobots(-1,them);
+                if(rc.getHealth() < RobotType.LUMBERJACK.maxHealth/10 && visibleEnemies.length>0){
+                    rc.broadcast(NUM_LUMBERJACKS_CHANNEL,rc.readBroadcast(NUM_LUMBERJACKS_CHANNEL)-1);
+                }
                 while (visibleEnemies.length > 0)
                 {
                     if (rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS,them).length>0 && rc.canStrike())

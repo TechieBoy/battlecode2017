@@ -14,23 +14,21 @@ public class TankBot extends BaseBot
             {
                 here = rc.getLocation();
                 visibleEnemies = rc.senseNearbyRobots(-1,them);
-                while (visibleEnemies.length > 0)
+                if (visibleEnemies.length > 0)
                 {
-                    if (rc.canFirePentadShot())
-                    {
-                        rc.firePentadShot(rc.getLocation().directionTo(visibleEnemies[0].location));
-                    }
-                    else
                     if(!rc.hasMoved())
                     {
                         tryMove(here.directionTo(visibleEnemies[0].location));
                     }
-                    here = rc.getLocation();
-                    visibleEnemies = rc.senseNearbyRobots(-1,them);
+                    else if (rc.canFirePentadShot())
+                    {
+                        rc.firePentadShot(rc.getLocation().directionTo(visibleEnemies[0].location));
+                    }
+
                 }
                 if(!rc.hasMoved())
                     tryMove(here.directionTo(closetInitalEnemyArchonLocation()));
-                if(rc.canFirePentadShot() && rc.readBroadcast(NUM_GARDENERS_CHANNEL) > 3 && rc.getTeamBullets() > 500)
+                if(rc.canFirePentadShot()  && rc.getTeamBullets() > 555)
                 {
                     rc.firePentadShot(here.directionTo(closetInitalEnemyArchonLocation()));
                 }

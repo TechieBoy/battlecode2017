@@ -10,8 +10,8 @@ public class GardenerBot extends BaseBot
     private static Direction bounce = here.directionTo(centerOfAllInitialArchons);
 
     private static int treesBuiltByMe = 0;
-    private static boolean needExtraLumberjacks = rc.getRoundNum() < 100;
-    private static boolean earlySoldier = rc.getRoundNum() < 100;
+    private static boolean needExtraLumberjacks = false;
+    private static boolean earlySoldier = rc.getRoundNum() < 80;
 
     public static void runGardener() throws GameActionException
     {
@@ -63,16 +63,6 @@ public class GardenerBot extends BaseBot
                     }
                 }
 
-                if(earlySoldier && rc.isBuildReady())
-                {
-                    if(spawnInAnyDirectionPossible(RobotType.SOLDIER))
-                    {
-                        earlySoldier = false;
-                        System.out.println("Khada soldier");
-                        Clock.yield();
-                    }
-                }
-
                 if (needExtraLumberjacks && rc.isBuildReady())
                 {
                     if (spawnInAnyDirectionPossible(RobotType.LUMBERJACK))
@@ -84,6 +74,16 @@ public class GardenerBot extends BaseBot
                     }
 
                 }
+                if(earlySoldier && rc.isBuildReady())
+                {
+                    if(spawnInAnyDirectionPossible(RobotType.SOLDIER))
+                    {
+                        earlySoldier = false;
+                        System.out.println("Khada soldier");
+                        Clock.yield();
+                    }
+                }
+
 
                 //Baith gaya
                 Direction dir = getNextDirection(prevDirection);
@@ -100,17 +100,7 @@ public class GardenerBot extends BaseBot
                     prevDirection = dir;
                 } else if (Math.abs(dir.degreesBetween(HOLE_TOWARDS_ENEMY)) < 30 && rc.getTreeCount() >= 2)
                 {
-                    if (needLumberjacks())
-                    {
-                        if (rc.hasRobotBuildRequirements(RobotType.LUMBERJACK))
-                        {
-                            if (rc.canBuildRobot(RobotType.LUMBERJACK, dir))
-                            {
-                                rc.buildRobot(RobotType.LUMBERJACK, dir);
-                                rc.broadcast(NUM_LUMBERJACKS_CHANNEL, rc.readBroadcast(NUM_LUMBERJACKS_CHANNEL) + 1);
-                            }
-                        }
-                    } else if (needScouts())
+                    if (needScouts())
                     {
                         if (rc.hasRobotBuildRequirements(RobotType.SCOUT))
                         {
@@ -119,6 +109,17 @@ public class GardenerBot extends BaseBot
                                 rc.buildRobot(RobotType.SCOUT, dir);
                                 System.out.println("Baithe hua scout");
 
+                            }
+                        }
+                    }
+                    else if (needLumberjacks())
+                    {
+                        if (rc.hasRobotBuildRequirements(RobotType.LUMBERJACK))
+                        {
+                            if (rc.canBuildRobot(RobotType.LUMBERJACK, dir))
+                            {
+                                rc.buildRobot(RobotType.LUMBERJACK, dir);
+                                rc.broadcast(NUM_LUMBERJACKS_CHANNEL, rc.readBroadcast(NUM_LUMBERJACKS_CHANNEL) + 1);
                             }
                         }
                     } else if (needSoldiers())
@@ -188,7 +189,7 @@ public class GardenerBot extends BaseBot
 
     private static boolean needLumberjacks() throws GameActionException
     {
-        return needExtraLumberjacks ||(rc.readBroadcast(URGENTLY_NEED_LUMBERJACKS_CHANNEL) == 1);
+        return (rc.getRoundNum() < 300) ||(rc.readBroadcast(URGENTLY_NEED_LUMBERJACKS_CHANNEL) == 1) || (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 4);
     }
 
     private static boolean spawnInAnyDirectionPossible(RobotType robotType) throws GameActionException
@@ -210,7 +211,7 @@ public class GardenerBot extends BaseBot
 
     private static boolean needScouts() throws GameActionException
     {
-        return (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 7) || (rc.getRoundNum() < 400 && rc.getTreeCount() > 2);
+        return (rc.senseNearbyTrees(-1, Team.NEUTRAL).length <= 3) || (rc.getRoundNum() < 500 && rc.getTreeCount() > 2);
 
     }
 

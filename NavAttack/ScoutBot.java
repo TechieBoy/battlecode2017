@@ -106,7 +106,7 @@ public class ScoutBot extends BaseBot
                 if (!rc.hasMoved())
                 {
                     findTreeBulletsAndTanks();
-                    if (!rc.hasMoved() && rc.getRoundNum() < 250)
+                    if (!rc.hasMoved() && rc.getRoundNum() < 320)
                         wander();
                     else if(!rc.hasMoved())
                         respondToBroadCasts();
