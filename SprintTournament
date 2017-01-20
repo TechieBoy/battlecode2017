@@ -1,0 +1,79 @@
+Analysis of the Sprint Tournament. 20/1/17
+
+
+
+OUR MATCHES:
+
+
+-----------------Match 1: Against $
+
+	Round 1: Arena
+		Apparently there is a flaw in our soldier. He stopped firing at the archon even though there seems to be no allies nearby. We need to work on our friendly fire and soldier micro. The lumberjack is killing our own scouts. The scouts when firing on same enemy need to stay away from lumberjack.
+	
+	Round 2: OMGTree
+		Scout does not attack the gardner while trying to the sit on the enemy tree. In this match the scout got stuck in such a position that it cannot sit on the tree. But he could have easily fired on and killed the gardener but didnt. The bug in our soldier was seen again. The Soldier does not fire even when standing right adjacent to the enemy archon. At 382 a scout explodes for no apparent reason, are we throwing a exception there?
+	
+	This match was easy but in the second map even though the map only has one huge tree why are we spamming scouts?
+	If we had better scout and soldier attack micros we could have won both matches a lot sooner.
+
+
+------------------Match 2: Against HappyLittleTrees
+
+	Round 1: Bullseye
+		We LOST! They rushed at us with 3 scouts and thats all. Their strategy was not quite good but it worked. We had made a soldier to prevent this as planned but soldier was useless against their fast moving scouts. We need to shoot in direction where the scouts would be in next rounds instead of their current location.
+
+	Round 2: Shrubbery
+		The map was covered randomly in small trees. Here our strategy to make lumberjacks was useful. Soldiers again proved useless against scout as the move too fast to fire bullets at. The Scouts freezed :(
+
+	Round 3: Barbell
+		Pathing would have helped alot in this map. Again the soldier was useless and lumberjack came to the rescue!
+
+		Their strategy was weak. Three scout rush left them with a bullet deficit but it worked well against not defending teams. We need better micro and defense to win against such attacks with guarantee.
+
+
+------------------Match 3: Against DirtNet
+
+	Round 1: Barbell
+		Good Match. Pathing would have helped. The Scouts spammed and gathered near the closestinitialenemyarchon even though he was dead. We somehow need to implement the global clearing of enemy archon locations once they are dead. Also if we are not able to do that then we must make the bots do something if they find their target to be dead. 
+
+	Round 2: CrossFire
+		This map was good. The scout bullet hunting is really good. The soldier again froze up.
+
+		Overall the match was easy. The enemy strategy was similar to ours. Try a single scout rush, make soldiers and send to initial enemy location and make lumberjack gardner pairs. 
+
+
+-----------------Match 4: Against AlgoGriffins
+
+	Round 1: LilForts
+		The map was small and overcrowded. We need lumberjacks and scouts but the garderner locked its spawn direction and was unable to spawn. They had planned better for crowded maps. We need to plan the spawning and ensure that we are able to spawn a robot at all times for emergency.
+
+	Round 2: Waves
+		The Map required a good pathing. Their micro was quite better than ours. They killed our wandering scouts (our scouts did nothing in retaliation) also our scouts could have stuck to their ungaurded archon. We need to replan the teamwork as the bots were just moving from archon to another getting both killed in the process. 
+
+		Overall they had a better micro and pathing, also the maps werent in our favour. We need to replan the whole teamwork strategy and urgently work on the pathing and micro.
+
+
+
+Problems that I found:
+
+* Why isnt our soldier firing even when next to enemy? We need to rethink friendly fire carefully.
+* Scout should fire even if it cannot sit on the tree. 
+* The scout seems not to be able to find the center of the tree sometimes.
+* Scout should try to go towards enemy from other sides. They tend to all concentrate in one direction towards the enemy.
+* Scouts seem to be exploding. We need to find the bug!!
+* Is soldier the answer to scout rush? we really need to improve here.
+* While attacking scouts we need to predict their next location and then fire at them.
+* Scouts while attacking need to stay at a distance from the enemy(especially against lumberjacks) so that they are not detected/attacked by the enemy also when in close combat the need to circle around the enemy as with their speed they can dodge almost all bullets before it hits them.
+* All bots should keep track of previous locations and if the are looping over them again and again they should try something else to move out. Most of the times if the robots had just moved better we could have killed their bots.
+* All bots need to be intelligent enough to realize that the task they are given is complete or cannot be completed and move on to the next task.
+* The teamwork strategy needs to implement priorities.Ex: If there are enemies around me and my archon or the health of my archon is low, I will not go to save other archons.
+
+
+
+IDEAS:
+
+* What if in mid game we make a gardner sheilded by a circle of lumberjacks that approaches the enemy location broadcasted by scouts and as we get near starts spawning other units as we need them?
+* If a gardner was killed then can we make a new gardner that will replace it and use the already planted tree of the dead gardner? We can save 300 bullets!
+* I think we should add a myEnemy and enum MyTask in the basebot. 
+
+
