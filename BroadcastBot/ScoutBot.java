@@ -1,15 +1,12 @@
 package BroadcastBot;
 
 import battlecode.common.*;
+
 import static BroadcastBot.Messaging.*;
 
 public class ScoutBot extends BaseBot
 {
-
     private static Direction bounce = here.directionTo(closetInitalEnemyArchonLocation());
-    private static int offsetArchon = 0;
-    private static int offsetGardener = 0;
-
     private static void wander() throws GameActionException
     {
         if (!rc.hasMoved())
@@ -20,7 +17,8 @@ public class ScoutBot extends BaseBot
                 Direction dir = here.directionTo(closetInitalEnemyArchonLocation());
                 bounce = dir.rotateLeftDegrees((float) ((Math.random() * 180) - 90));
 
-            } else
+            }
+            else
                 tryMove(bounce);
         }
 
@@ -49,35 +47,35 @@ public class ScoutBot extends BaseBot
                             }
                             else if (!rc.hasMoved())
                             {
-                                    tryMove(here.directionTo(robotInfo.location));
+                                tryMove(here.directionTo(robotInfo.location));
                             }
                         }
                         else if (robotInfo.getType() == RobotType.GARDENER)
                         {
                             broadcastEnemyLocation(robotInfo);
-                            while(rc.canSenseRobot(robotInfo.ID))
+                            while (rc.canSenseRobot(robotInfo.ID))
                             {
                                 robotInfo = rc.senseRobot(robotInfo.ID);
                                 here = rc.getLocation();
-                                if(here.distanceTo(robotInfo.location)>2.5*robotInfo.getRadius())
+                                if (here.distanceTo(robotInfo.location) > 2.5 * robotInfo.getRadius())
                                 {
                                     tryMove(here.directionTo(robotInfo.location));
                                 }
                                 else
                                 {
-                                    visibleEnemyTrees = rc.senseNearbyTrees(-1,them);
-                                    if(visibleEnemyTrees.length>0)
+                                    visibleEnemyTrees = rc.senseNearbyTrees(-1, them);
+                                    if (visibleEnemyTrees.length > 0)
                                     {
-                                        MapLocation treeLocation= visibleEnemyTrees[0].location;
-                                        if(here.distanceTo(treeLocation)<rc.getType().strideRadius)
+                                        MapLocation treeLocation = visibleEnemyTrees[0].location;
+                                        if (here.distanceTo(treeLocation) < rc.getType().strideRadius)
                                         {
-                                            if(here.distanceTo(treeLocation)>0.01f && !rc.hasMoved() && rc.canMove(here.directionTo(treeLocation),here.distanceTo(treeLocation)))
+                                            if (here.distanceTo(treeLocation) > 0.01f && !rc.hasMoved() && rc.canMove(here.directionTo(treeLocation), here.distanceTo(treeLocation)))
                                             {
-                                                rc.move(here.directionTo(treeLocation),here.distanceTo(treeLocation));
+                                                rc.move(here.directionTo(treeLocation), here.distanceTo(treeLocation));
                                             }
                                             else
                                             {
-                                                if(rc.canFireSingleShot())
+                                                if (rc.canFireSingleShot())
                                                 {
                                                     rc.fireSingleShot(here.directionTo(robotInfo.location).rotateLeftDegrees(29));
                                                 }
@@ -110,10 +108,10 @@ public class ScoutBot extends BaseBot
                     findTreeBulletsAndTanks();
                     if (rc.getRoundNum() < 320)
                         wander();
-                    else if(!rc.hasMoved())
+                    else if (!rc.hasMoved())
                         respondToBroadCasts();
                 }
-                if(!rc.hasMoved())
+                if (!rc.hasMoved())
                 {
                     wander();
                 }
@@ -130,17 +128,41 @@ public class ScoutBot extends BaseBot
     {
         here = rc.getLocation();
         boolean friendlyArchonUnderAttack = rc.readBroadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL) == 1;
-
-
-        offsetArchon = respondToParticularBroadcasts(RobotType.SOLDIER,FOUND_ENEMY_ARCHON_CHANNEL,FOUND_ENEMY_ARCHON_CHANNEL_END,RobotType.ARCHON,offsetArchon);
-        offsetGardener = respondToParticularBroadcasts(RobotType.SOLDIER,FOUND_ENEMY_GARDENER_CHANNEL,FOUND_ENEMY_GARDENER_CHANNEL_END,RobotType.GARDENER,offsetGardener);
-        if(friendlyArchonUnderAttack)
+        LocId archonLocId = getBestLocationToGo(FOUND_ENEMY_ARCHON_CHANNEL, FOUND_ENEMY_ARCHON_CHANNEL_END);
+        LocId gardenerLocId = getBestLocationToGo(FOUND_ENEMY_GARDENER_CHANNEL, FOUND_ENEMY_GARDENER_CHANNEL_END);
+        if (archonLocId != null)
         {
-            MapLocation friendlyArchonLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_X)),Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_Y)));
-            if(here.isWithinDistance(friendlyArchonLocation,RobotType.SCOUT.sensorRadius))
+            if (here.isWithinDistance(archonLocId.location, myType.sensorRadius))
             {
-                if(rc.senseNearbyRobots(RobotType.SCOUT.sensorRadius,them).length == 0)
-                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
+                if (!rc.canSenseRobot(rc.readBroadcast(archonLocId.channelOfID)))
+                {
+                    rc.broadcast(archonLocId.channelOfID, 0);
+                }
+            }
+            else
+                tryMove(here.directionTo(archonLocId.location));
+            return true;
+        }
+        else if(gardenerLocId!=null)
+        {
+            if(here.isWithinDistance(gardenerLocId.location,myType.sensorRadius))
+            {
+                if(!rc.canSenseRobot(rc.readBroadcast(gardenerLocId.channelOfID)))
+                {
+                    rc.broadcast(gardenerLocId.channelOfID,0);
+                }
+            }
+            else
+                tryMove(here.directionTo(gardenerLocId.location));
+            return true;
+        }
+        else if (friendlyArchonUnderAttack)
+        {
+            MapLocation friendlyArchonLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_X)), Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_Y)));
+            if (here.isWithinDistance(friendlyArchonLocation, RobotType.SCOUT.sensorRadius))
+            {
+                if (rc.senseNearbyRobots(RobotType.SCOUT.sensorRadius, them).length == 0)
+                    rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL, 0);
             }
             else
                 tryMove(here.directionTo(friendlyArchonLocation));
@@ -168,7 +190,8 @@ public class ScoutBot extends BaseBot
                     if (rc.canShake(i.ID))
                     {
                         rc.shake(i.ID);
-                    } else
+                    }
+                    else
                     {
                         if (!rc.hasMoved())
                             tryMove(here.directionTo(i.location));

@@ -10,8 +10,6 @@ public class SoldierBot extends BaseBot
     private static Direction defensiveBounce = here.directionTo(closetInitalAlliedArchonLocation());
     private static RobotInfo myEnemy = null;
     private static boolean onDefense = rc.getRoundNum() < 80;
-    private static int offsetArchon = 0;
-    private static int offsetGardener = 0;
     public static void runSoldier() throws GameActionException
     {
         while (true)
@@ -215,11 +213,9 @@ public class SoldierBot extends BaseBot
     {
         here = rc.getLocation();
         boolean friendlyArchonUnderAttack = rc.readBroadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL) == 1;
-
         boolean friendlyGardenerUnderAttack = rc.readBroadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL) == 1;
-
-        offsetArchon = respondToParticularBroadcasts(RobotType.SOLDIER,FOUND_ENEMY_ARCHON_CHANNEL,FOUND_ENEMY_ARCHON_CHANNEL_END,RobotType.ARCHON,offsetArchon);
-        offsetGardener = respondToParticularBroadcasts(RobotType.SOLDIER,FOUND_ENEMY_GARDENER_CHANNEL,FOUND_ENEMY_GARDENER_CHANNEL_END,RobotType.GARDENER,offsetGardener);
+        LocId archonLocId = getBestLocationToGo(FOUND_ENEMY_ARCHON_CHANNEL,FOUND_ENEMY_ARCHON_CHANNEL_END);
+        LocId gardenerLocId = getBestLocationToGo(FOUND_ENEMY_GARDENER_CHANNEL,FOUND_ENEMY_GARDENER_CHANNEL_END);
         if(friendlyArchonUnderAttack)
         {
             MapLocation friendlyArchonLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_X)),Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_ARCHON_Y)));
@@ -232,6 +228,19 @@ public class SoldierBot extends BaseBot
                 tryMove(here.directionTo(friendlyArchonLocation));
             return true;
         }
+        else if(archonLocId!= null)
+        {
+            if(here.isWithinDistance(archonLocId.location,myType.sensorRadius))
+            {
+                if(!rc.canSenseRobot(rc.readBroadcast(archonLocId.channelOfID)))
+                {
+                    rc.broadcast(archonLocId.channelOfID,0);
+                }
+            }
+            else
+                tryMove(here.directionTo(archonLocId.location));
+            return true;
+        }
         else if(friendlyGardenerUnderAttack)
         {
             MapLocation friendlyGardenerLocation = new MapLocation(Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_GARDENER_X)),Float.intBitsToFloat(rc.readBroadcast(FRIENDLY_GARDENER_Y)));
@@ -242,6 +251,19 @@ public class SoldierBot extends BaseBot
             }
             else
                 tryMove(here.directionTo(friendlyGardenerLocation));
+            return true;
+        }
+        else if(gardenerLocId!=null)
+        {
+            if(here.isWithinDistance(gardenerLocId.location,myType.sensorRadius))
+            {
+                if(!rc.canSenseRobot(rc.readBroadcast(gardenerLocId.channelOfID)))
+                {
+                    rc.broadcast(gardenerLocId.channelOfID,0);
+                }
+            }
+            else
+                tryMove(here.directionTo(gardenerLocId.location));
             return true;
         }
 
