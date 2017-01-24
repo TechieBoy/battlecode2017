@@ -1,0 +1,107 @@
+private static char motionType = 'd';//direct,bug
+    private static Direction bugDirection = randomDirection();
+    private static TreeInfo[] allNearbyTrees = null;
+    private static TreeInfo myTree = null;
+
+public static void bugNav(MapLocation target) throws GameActionException
+    {
+        if(!rc.hasMoved())
+        {
+            Direction dir = here.directionTo(target);
+
+            if(motionType=='d')
+            {
+                allNearbyTrees = rc.senseNearbyTrees(here.add(dir,myType.strideRadius*2),myType.strideRadius*2,null);
+                if(rc.canMove(dir))
+                {
+                    rc.move(dir);
+                    rc.setIndicatorLine(here,here.add(dir,20f),0,255,0);
+                }
+                else
+                {
+                    motionType = 'b';
+                    if(allNearbyTrees.length>1)
+                    {
+                        bugDirection = allNearbyTrees[0].location.directionTo(allNearbyTrees[1].location);
+                        myTree = allNearbyTrees[0];
+                        tryMove(bugDirection);
+                        rc.setIndicatorLine(here,here.add(bugDirection,20f),0,0,255);
+                    }
+                    else if(allNearbyTrees.length==1)
+                    {
+                        bugDirection = here.directionTo(allNearbyTrees[0].location).rotateRightDegrees(90);
+                        tryMove(bugDirection);
+                        myTree = allNearbyTrees[0];
+                        rc.setIndicatorLine(here,here.add(bugDirection,20f),0,0,255);
+                    }
+                    else
+                    {
+                        //I M STUCK;
+                        tryMove(dir);
+                        motionType = 'd';
+                    }
+                }
+            }
+            else
+            {
+                allNearbyTrees = rc.senseNearbyTrees(here.add(bugDirection,myType.strideRadius*2),myType.strideRadius*2,null);
+                if(rc.canMove(dir) && here.distanceTo(target)<here.add(bugDirection).distanceTo(target))
+                {
+                    motionType = 'd';
+                    tryMove(dir);
+                    rc.setIndicatorLine(here,here.add(dir,20f),255,25,255);
+                }
+                
+                if(rc.canMove(bugDirection))
+                {
+                    tryMove(bugDirection);
+                    rc.setIndicatorLine(here,here.add(bugDirection,20f),0,0,255);
+                }
+                else
+                {
+                    if(allNearbyTrees.length>1 && myTree!=null)
+                    {
+                        int i=0,j;
+                        while(i<allNearbyTrees.length && allNearbyTrees[i]!=myTree)
+                        {
+                            i++;
+                        }
+                        j=i+1;
+                        while(j<allNearbyTrees.length && allNearbyTrees[j]!=myTree)
+                        {
+                            j++;
+                        }
+
+                        if(i==allNearbyTrees.length || j==allNearbyTrees.length || i==j)
+                        {
+                            bugDirection = allNearbyTrees[0].location.directionTo(allNearbyTrees[1].location);
+                            myTree = allNearbyTrees[0];
+                            tryMove(bugDirection);
+                            rc.setIndicatorLine(here,here.add(bugDirection,20f),255,0,0);
+                        }
+                        else
+                        {
+                            bugDirection = allNearbyTrees[i].location.directionTo(allNearbyTrees[j].location);
+                            myTree = allNearbyTrees[i];
+                            tryMove(bugDirection);
+                            rc.setIndicatorLine(here,here.add(bugDirection,20f),255,0,0);
+                        }
+                    }
+                    else if(allNearbyTrees.length==1)
+                    {
+                        bugDirection = here.directionTo(allNearbyTrees[0].location).rotateRightDegrees(90);
+                        tryMove(bugDirection);
+                        myTree = allNearbyTrees[0];
+                        rc.setIndicatorLine(here,here.add(bugDirection,20f),255,0,0);
+                    }
+                    else
+                    {
+                        //I M STUCK;
+                        tryMove(dir);
+                        motionType = 'd';
+                        rc.setIndicatorLine(here,here.add(dir,20f),255,0,0);
+                    }
+                }
+            }
+        }
+    }
