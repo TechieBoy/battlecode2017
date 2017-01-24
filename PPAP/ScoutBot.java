@@ -32,7 +32,12 @@ public class ScoutBot extends BaseBot
             {
                 if (rc.readBroadcast(EARLY_GAME_SCOUT_SPAWNED_CHANNEL) == 0)
                     rc.broadcast(EARLY_GAME_SCOUT_SPAWNED_CHANNEL, 1);
-                findTreeBulletsAndTanks();
+                if(rc.getRoundNum() < 150)
+                {
+                    findTreeBulletsAndTanks();
+                    if(!rc.hasMoved())
+                        wander();
+                }
                 visibleEnemies = rc.senseNearbyRobots(-1, them);
                 if (visibleEnemies.length > 0)
                 {

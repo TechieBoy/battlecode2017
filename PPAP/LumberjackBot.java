@@ -46,26 +46,13 @@ public class LumberjackBot extends BaseBot
                 visibleEnemies = rc.senseNearbyRobots(-1,them);
                 while (visibleEnemies.length > 0)
                 {
-
                     if (rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS,them).length>0 && rc.canStrike())
                     {
                         rc.strike();
                     }
-                    else if(!rc.hasMoved() && !here.isWithinDistance(visibleEnemies[0].location,GameConstants.LUMBERJACK_STRIKE_RADIUS))
-                    {
-                        tryMove(here.directionTo(visibleEnemies[0].location));
-                    }
                     else if(!rc.hasMoved())
                     {
-                        here = rc.getLocation();
-                        visibleAllies = rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS,us);
-                        if(visibleAllies.length > 0)
-                        {
-                            Direction alliedToEnemy = visibleAllies[0].location.directionTo(visibleEnemies[0].location);
-                            Direction alliedToMe = visibleAllies[0].location.directionTo(here);
-                            float angle = alliedToMe.degreesBetween(alliedToEnemy);
-                            tryMove(visibleAllies[0].location.directionTo(visibleEnemies[0].location).rotateLeftDegrees(angle));
-                        }
+                        tryMove(here.directionTo(visibleEnemies[0].location));
                     }
                     here = rc.getLocation();
                     visibleEnemies = rc.senseNearbyRobots(-1,them);
@@ -83,7 +70,7 @@ public class LumberjackBot extends BaseBot
                             }
                             else
                                 if(!rc.hasMoved())
-                                bugNav(i.location);
+                                tryMove(here.directionTo(i.location));
                         }
                     }
                     if(rc.canShake(info[0].ID))
@@ -130,7 +117,7 @@ public class LumberjackBot extends BaseBot
                     rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL,0);
             }
             else
-                bugNav(friendlyGardenerLocation);
+                tryMove(here.directionTo(friendlyGardenerLocation));
             return true;
         }
         else if(friendlyArchonUnderAttack)
@@ -145,7 +132,7 @@ public class LumberjackBot extends BaseBot
                 }
             }
             else
-                bugNav(friendlyArchonLocation);
+                tryMove(here.directionTo(friendlyArchonLocation));
             return true;
         }
         return false;
