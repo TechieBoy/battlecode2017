@@ -23,7 +23,7 @@ public class SoldierBot extends BaseBot
                     if(visibleEnemies.length > 0)
                     {
                         if (!rc.hasMoved())
-                            tryMove(here.directionTo(visibleEnemies[0].location));
+                            bugNav(visibleEnemies[0].location);
                         else
                         {
                             if (here.distanceTo(visibleEnemies[0].location) < 2)
@@ -70,7 +70,7 @@ public class SoldierBot extends BaseBot
                                 }
                                 else if (rc.canMove(here.directionTo(robotInfo.location)))
                                 {
-                                    tryMove(here.directionTo(robotInfo.location));
+                                    bugNav(robotInfo.location);
                                 }
 
                             } else if (robotInfo.getType() == RobotType.GARDENER)
@@ -91,7 +91,7 @@ public class SoldierBot extends BaseBot
                                 }
                                 else if (rc.canMove(here.directionTo(robotInfo.location)))
                                 {
-                                    tryMove(here.directionTo(robotInfo.location));
+                                    bugNav(robotInfo.location);
                                 }
                             }
                             else if(robotInfo.getType() == RobotType.LUMBERJACK && !friendlyfire(robotInfo))
@@ -121,7 +121,7 @@ public class SoldierBot extends BaseBot
                         if (rc.canSenseRobot(myEnemy.ID))
                         {
                             myEnemy = rc.senseRobot(myEnemy.ID);
-                            tryMove(here.directionTo(myEnemy.location));
+                            bugNav(myEnemy.location);
                             here = rc.getLocation();
                             if (rc.canFirePentadShot() && !friendlyfire(myEnemy))
                             {
@@ -201,7 +201,7 @@ public class SoldierBot extends BaseBot
                     rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL,0);
             }
             else
-                tryMove(here.directionTo(friendlyGardenerLocation));
+                bugNav(friendlyGardenerLocation);
             return true;
         }
         else if(friendlyArchonUnderAttack)
@@ -213,7 +213,7 @@ public class SoldierBot extends BaseBot
                     rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
             }
             else
-                tryMove(here.directionTo(friendlyArchonLocation));
+                bugNav(friendlyArchonLocation);
             return true;
         }
         return false;
@@ -236,7 +236,7 @@ public class SoldierBot extends BaseBot
                     rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL,0);
             }
             else
-                tryMove(here.directionTo(friendlyArchonLocation));
+                bugNav(friendlyArchonLocation);
             return true;
         }
         else if(archonLocId!= null)
@@ -249,7 +249,7 @@ public class SoldierBot extends BaseBot
                 }
             }
             else
-                tryMove(here.directionTo(archonLocId.location));
+                bugNav(archonLocId.location);
             return true;
         }
         else if(friendlyGardenerUnderAttack)
@@ -261,7 +261,7 @@ public class SoldierBot extends BaseBot
                     rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL,0);
             }
             else
-                tryMove(here.directionTo(friendlyGardenerLocation));
+                bugNav(friendlyGardenerLocation);
             return true;
         }
         else if(gardenerLocId!=null)
@@ -274,7 +274,7 @@ public class SoldierBot extends BaseBot
                 }
             }
             else
-                tryMove(here.directionTo(gardenerLocId.location));
+                bugNav(gardenerLocId.location);
             return true;
         }
 
