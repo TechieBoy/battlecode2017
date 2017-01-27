@@ -1,0 +1,23 @@
+1. Better spawning.
+2. Reduce dependency on primary archon.
+3. Gardener should dodge bullets.
+4. Add bugnav wherever possible.
+5. Don't gather everyone on location.
+6. Try to get archon to move to safe location early. (Careful on small maps)
+7. Better scout harass.
+8. Soldier dodging.
+9. Wander to enemy broadcast locations.
+10. Broadcast all initial archon location in the beginning itself.
+11. If enemy health is less than 40%, make him myEnemy.
+12. Increase scout bullet hunting period. Harass enemies if found, still keep trying to find bullet trees.
+13. Soldiers should stand at their place and trydodge rather than move due to ifhasnotmoved condition.
+14. Lumberjacks should run away from tanks.
+15. Lumberjacks should cut trees when path to enemies is blocked.
+16. Lumberjacks should only cut trees if it has archon,gardener,tank or if its health is less than some threshold. (probably around 1000)
+17. Improve scout micro.
+    -- Archon,gardener,scout -> shoot
+    -- tank -> broadcast and run away.
+    -- soldier,lumberjack -> run away staying in range if possible.
+    -- default -> find trees with bullets.
+18. While shooting lumberjacks, if more enemies in that direction then shoot pentad instead.
+19. Tanks should not try to walk over friendly trees if possible.
