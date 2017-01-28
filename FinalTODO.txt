@@ -1,7 +1,7 @@
-1. Better spawning.
-2. Reduce dependency on primary archon.
-3. Gardener should dodge bullets.
-4. Add bugnav wherever possible.
+1. Better spawning. 
+2. Reduce dependency on primary archon. (Archon should spawn even if there are friendlies in the sesne radius)
+^3. Gardener should dodge bullets.  //   DONE but needs to be checked.
+^4. Add bugnav wherever possible.    // I feel TheBot is using bugnav wherever necessarry.
 5. Don't gather everyone on location.
 6. Try to get archon to move to safe location early. (Careful on small maps)
 7. Better scout harass.
@@ -14,10 +14,13 @@
 14. Lumberjacks should run away from tanks.
 15. Lumberjacks should cut trees when path to enemies is blocked.
 16. Lumberjacks should only cut trees if it has archon,gardener,tank or if its health is less than some threshold. (probably around 1000)
-17. Improve scout micro.
+^17. Improve scout micro.                //  DONE. Test if possible.
     -- Archon,gardener,scout -> shoot
     -- tank -> broadcast and run away.
     -- soldier,lumberjack -> run away staying in range if possible.
     -- default -> find trees with bullets.
 18. While shooting lumberjacks, if more enemies in that direction then shoot pentad instead.
 19. Tanks should not try to walk over friendly trees if possible.
+
+NOTE: Have created a function willmybullethit() in basebot. It checks for trees and enemies in between our location and given robotinfo and return true or false. Try to use it wherever useful.
+Currently theBot is better than finalBot but i think it will change once all the changes have been done.
