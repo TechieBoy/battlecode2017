@@ -9,8 +9,9 @@ public class SoldierBot extends BaseBot
     private static Direction bounce = here.directionTo(closetInitalEnemyArchonLocation());
     private static Direction defensiveBounce = here.directionTo(closetInitalAlliedArchonLocation());
     private static RobotInfo myEnemy = null;
+    private static MapLocation[] broadcastingLocations;
     private static boolean onDeffense = rc.getRoundNum() < 155;
-    private static int enemyArchonNumber=0;
+    private static int enemyArchonNumber = 0;
 
     public static void runSoldier() throws GameActionException
     {
@@ -23,7 +24,11 @@ public class SoldierBot extends BaseBot
 
                 if (visibleEnemies.length > 0 && myEnemy == null)
                 {
-                    RobotInfo robotInfo =visibleEnemies[0];
+                    RobotInfo robotInfo = visibleEnemies[0];
+
+                    if (robotInfo.getHealth() <= robotInfo.getType().maxHealth * 0.4)
+                        myEnemy = robotInfo;
+
                     if (robotInfo.getType() == RobotType.ARCHON)
                     {
                         broadcastEnemyLocation(robotInfo);
@@ -46,7 +51,7 @@ public class SoldierBot extends BaseBot
                         {
                             rc.fireTriadShot(rc.getLocation().directionTo(robotInfo.location));
                         }
-                        else if(rc.canFireSingleShot())
+                        else if (rc.canFireSingleShot())
                         {
                             rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location));
                         }
@@ -66,23 +71,26 @@ public class SoldierBot extends BaseBot
                     }
                     else if (robotInfo.getType() == RobotType.LUMBERJACK)
                     {
-                        if(robotInfo.health< robotInfo.getType().maxHealth/5)
+                        tryMove(robotInfo.location.directionTo(here), 5, 30);
+                        here = rc.getLocation();
+                        float midDistance = here.distanceTo(robotInfo.location) / 2;
+                        MapLocation midLoc = here.add(here.directionTo(robotInfo.location), midDistance);
+                        if (rc.senseNearbyRobots(midLoc, myType.sensorRadius, them).length > 1)
                         {
-                            myEnemy = robotInfo;
+                            if (rc.canFireTriadShot())
+                            {
+                                rc.fireTriadShot(rc.getLocation().directionTo(robotInfo.location));
+                            }
                         }
-                        tryMove(robotInfo.location.directionTo(here),5,30);
-                        if (rc.canFireSingleShot())
+                        else if (rc.canFireSingleShot())
                         {
                             rc.fireSingleShot(rc.getLocation().directionTo(robotInfo.location));
                         }
                     }
-                    else if (robotInfo.getType()== RobotType.SOLDIER)
+                    else if (robotInfo.getType() == RobotType.SOLDIER)
                     {
-                        if(robotInfo.health< robotInfo.getType().maxHealth/5)
-                        {
-                            myEnemy = robotInfo;
-                        }
-                        if (here.distanceTo(robotInfo.location)<3*myType.strideRadius)
+
+                        if (here.distanceTo(robotInfo.location) < 3 * myType.strideRadius)
                         {
                             tryMove(robotInfo.location.directionTo(here));
                         }
@@ -94,7 +102,7 @@ public class SoldierBot extends BaseBot
                         {
                             rc.firePentadShot(here.directionTo(robotInfo.location));
                         }
-                        else if(rc.canFireSingleShot())
+                        else if (rc.canFireSingleShot())
                         {
                             rc.fireSingleShot(here.directionTo(robotInfo.location));
                         }
@@ -117,13 +125,13 @@ public class SoldierBot extends BaseBot
                     {
                         here = rc.getLocation();
                         myEnemy = rc.senseRobot(myEnemy.ID);
-                        if(here.distanceTo(myEnemy.location)>myType.strideRadius)
+                        if (here.distanceTo(myEnemy.location) > myType.strideRadius)
                             bugNav(myEnemy.location);
                         if (rc.canFirePentadShot() && !friendlyfire(myEnemy))
                         {
                             rc.firePentadShot(rc.getLocation().directionTo(myEnemy.location));
                         }
-                        else if(rc.canFireSingleShot())
+                        else if (rc.canFireSingleShot())
                         {
                             rc.fireSingleShot(rc.getLocation().directionTo(myEnemy.location));
                         }
@@ -146,9 +154,9 @@ public class SoldierBot extends BaseBot
                     }
                     else
                     {
-                        if(enemyArchonNumber>(numberOfInitialArchon-1))
+                        if (enemyArchonNumber > (numberOfInitialArchon - 1))
                             wander();
-                        else if(here.distanceTo(theirInitialArchonLocations[enemyArchonNumber])>myType.bodyRadius)
+                        else if (here.distanceTo(theirInitialArchonLocations[enemyArchonNumber]) > myType.bodyRadius)
                             bugNav(theirInitialArchonLocations[enemyArchonNumber]);
                         else
                             enemyArchonNumber++;
@@ -192,15 +200,33 @@ public class SoldierBot extends BaseBot
     {
         if (!rc.hasMoved())
         {
-            if (!rc.canMove(bounce))
+            here = rc.getLocation();
+            if(broadcastingLocations == null || rc.getRoundNum()%50 >= 30)
+                broadcastingLocations = rc.senseBroadcastingRobotLocations();
+            if(broadcastingLocations.length > 0)
             {
-                here = rc.getLocation();
-                Direction dir = here.directionTo(closetInitalEnemyArchonLocation());
-                bounce = dir.rotateLeftDegrees((float) ((Math.random() * 180) - 90));
+                for(MapLocation loc : broadcastingLocations)
+                {
+                    if(!here.isWithinDistance(loc,myType.strideRadius))
+                    {
+                        tryMove(here.directionTo(loc));
+                        break;
+                    }
+                }
 
             }
             else
-                tryMove(bounce);
+            {
+                if (!rc.canMove(bounce))
+                {
+                    here = rc.getLocation();
+                    Direction dir = here.directionTo(closetInitalEnemyArchonLocation());
+                    bounce = dir.rotateLeftDegrees((float) ((Math.random() * 180) - 90));
+
+                }
+                else
+                    tryMove(bounce);
+            }
         }
 
     }
@@ -253,7 +279,7 @@ public class SoldierBot extends BaseBot
                 if (rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadius, them).length == 0)
                     rc.broadcast(FRIENDLY_ARCHON_UNDER_ATTACK_CHANNEL, 0);
             }
-            else if(here.distanceTo(friendlyArchonLocation)>35*myType.strideRadius)
+            else if (here.distanceTo(friendlyArchonLocation) > 35 * myType.strideRadius)
                 return false;
             else
                 tryMove(here.directionTo(friendlyArchonLocation));
@@ -264,6 +290,21 @@ public class SoldierBot extends BaseBot
             if (here.isWithinDistance(archonLocId.location, myType.sensorRadius))
             {
                 if (!rc.canSenseRobot(rc.readBroadcast(archonLocId.channelOfID)))
+                {
+                    rc.broadcast(archonLocId.channelOfID, 0);
+                }
+                boolean found = false;
+                visibleEnemies = rc.senseNearbyRobots(-1,them);
+                for (RobotInfo i : visibleEnemies)
+                {
+                    if (i.getType() == RobotType.ARCHON)
+                    {
+                        rc.broadcast(archonLocId.channelOfID, i.ID);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
                 {
                     rc.broadcast(archonLocId.channelOfID, 0);
                 }
@@ -280,7 +321,7 @@ public class SoldierBot extends BaseBot
                 if (rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadius / 2, them).length == 0)
                     rc.broadcast(FRIENDLY_GARDENER_UNDER_ATTACK_CHANNEL, 0);
             }
-            else if(here.distanceTo(friendlyGardenerLocation)>35*myType.strideRadius)
+            else if (here.distanceTo(friendlyGardenerLocation) > 35 * myType.strideRadius)
                 return false;
             else
                 tryMove(here.directionTo(friendlyGardenerLocation));
@@ -291,6 +332,22 @@ public class SoldierBot extends BaseBot
             if (here.isWithinDistance(gardenerLocId.location, myType.sensorRadius))
             {
                 if (!rc.canSenseRobot(rc.readBroadcast(gardenerLocId.channelOfID)))
+                {
+                    rc.broadcast(gardenerLocId.channelOfID, 0);
+                }
+                visibleEnemies = rc.senseNearbyRobots(-1, them);
+
+                boolean found = false;
+                for (RobotInfo i : visibleEnemies)
+                {
+                    if (i.getType() == RobotType.GARDENER)
+                    {
+                        rc.broadcast(gardenerLocId.channelOfID, i.ID);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
                 {
                     rc.broadcast(gardenerLocId.channelOfID, 0);
                 }
@@ -352,11 +409,11 @@ public class SoldierBot extends BaseBot
                 if (i.getType() == RobotType.ARCHON || i.getType() == RobotType.GARDENER)
                     return true;
             }
-            if (alliesInRange.length==1 && alliesInRange[0].ID==rc.getID())
+            if (alliesInRange.length == 1 && alliesInRange[0].ID == rc.getID())
             {
                 return false;
             }
-            if(alliesInRange[0].health<alliesInRange[0].getType().maxHealth/10)
+            if (alliesInRange[0].health < alliesInRange[0].getType().maxHealth / 10)
                 return true;
             else
                 return false;

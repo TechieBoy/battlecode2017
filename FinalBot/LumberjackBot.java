@@ -51,7 +51,23 @@ public class LumberjackBot extends BaseBot
                     }
                     else if(!rc.hasMoved())
                     {
-                        tryMove(here.directionTo(visibleEnemies[0].location));
+                        for(RobotInfo i : visibleEnemies)
+                        {
+                            if(i.getType() == RobotType.TANK)
+                            {
+                                tryMove(i.location.directionTo(here));
+                                break;
+                            }
+
+                        }
+                        if(!rc.hasMoved())
+                        {
+                            tryMove(here.directionTo(visibleEnemies[0].location));
+                        }
+                        if(!rc.hasMoved())
+                        {
+                            break;
+                        }
                     }
                     here = rc.getLocation();
                     visibleEnemies = rc.senseNearbyRobots(-1,them);
@@ -76,7 +92,7 @@ public class LumberjackBot extends BaseBot
                     {
                         rc.shake(info[0].ID);
                     }
-                    if (rc.canChop(info[0].ID))
+                    if (rc.canChop(info[0].ID)  && info[0].health <= 1000)
                     {
                         rc.chop(info[0].ID);
                     }

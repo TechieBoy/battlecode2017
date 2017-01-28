@@ -170,6 +170,21 @@ public class ScoutBot extends BaseBot
                 {
                     rc.broadcast(archonLocId.channelOfID, 0);
                 }
+                boolean found = false;
+                visibleEnemies = rc.senseNearbyRobots(-1,them);
+                for (RobotInfo i : visibleEnemies)
+                {
+                    if (i.getType() == RobotType.ARCHON)
+                    {
+                        rc.broadcast(archonLocId.channelOfID, i.ID);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                {
+                    rc.broadcast(archonLocId.channelOfID, 0);
+                }
             }
             else
                 tryMove(here.directionTo(archonLocId.location));
@@ -182,6 +197,21 @@ public class ScoutBot extends BaseBot
                 if(!rc.canSenseRobot(rc.readBroadcast(gardenerLocId.channelOfID)))
                 {
                     rc.broadcast(gardenerLocId.channelOfID,0);
+                }
+                boolean found = false;
+                visibleEnemies = rc.senseNearbyRobots(-1,them);
+                for (RobotInfo i : visibleEnemies)
+                {
+                    if (i.getType() == RobotType.GARDENER)
+                    {
+                        rc.broadcast(gardenerLocId.channelOfID, i.ID);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                {
+                    rc.broadcast(gardenerLocId.channelOfID, 0);
                 }
             }
             else

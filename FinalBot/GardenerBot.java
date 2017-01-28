@@ -97,6 +97,7 @@ public class GardenerBot extends BaseBot
                 callForHelpIfInDangerAndDefend();
                 if (rc.getHealth() < RobotType.GARDENER.maxHealth / 10 && visibleEnemies.length > 0)
                 {
+                    rc.broadcast(GARDENER_ABOUT_TO_DIE_CHANNEL,1);
                     rc.broadcast(NUM_GARDENERS_CHANNEL, (rc.readBroadcast(NUM_GARDENERS_CHANNEL) - 1));
 
                 }

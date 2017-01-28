@@ -41,6 +41,8 @@ public class Messaging extends BaseBot
     public static final int FRIENDLY_GARDENER_Y = 262;
 
     public static final int LAST_GARDENER_SPAWNED_CHANNEL = 263;
+    public static final int GARDENER_ABOUT_TO_DIE_CHANNEL = 264;
+    public static final int BROADCAST_INITIAL_ARCHONS = 265;
 
 
 
@@ -97,7 +99,7 @@ public class Messaging extends BaseBot
 
     }
 
-    private static void broadcastAtRightChannel(int channelStart,int channelEnd,RobotInfo robotInfo) throws GameActionException
+    public static void broadcastAtRightChannel(int channelStart,int channelEnd,RobotInfo robotInfo) throws GameActionException
     {
         int i = channelStart;
         while(rc.readBroadcast(i)!=0 && i!= channelEnd)
